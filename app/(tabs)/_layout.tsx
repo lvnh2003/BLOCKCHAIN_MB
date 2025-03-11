@@ -17,18 +17,18 @@ export default function AppLayout() {
           }}
         />
         <Tabs.Screen
-          name="students/index"
+          name="teachers/index"
           options={{
-            title: 'Students',
+            title: 'Teachers',
             tabBarIcon: ({ color, size }) => (
               <MaterialCommunityIcons name="account-group" color={color} size={size} />
             ),
           }}
         />
         <Tabs.Screen
-          name="certificates/index"
+          name="certificates"
           options={{
-            title: 'Certificates',
+            title: "Certificates",
             tabBarIcon: ({ color, size }) => (
               <MaterialCommunityIcons name="certificate" color={color} size={size} />
             ),
