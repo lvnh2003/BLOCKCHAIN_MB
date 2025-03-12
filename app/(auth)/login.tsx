@@ -5,14 +5,13 @@ import { useRouter } from 'expo-router';
 import { useAuth } from '../../context/AuthContext';
 
 export default function Login() {
-  const [username, setUsername] = useState('');
+  const [code, setCode] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState<'student' | 'teacher'>('student');
   const router = useRouter();
   const { login } = useAuth();
 
   const handleLogin = () => {
-    login({ username, role });
+    login({ code, password });
     router.replace('/');
   };
 
@@ -24,21 +23,10 @@ export default function Login() {
             resizeMode="contain"
           />
       <Title style={styles.title}>Student Management System</Title>
-      
-      <SegmentedButtons
-        value={role}
-        onValueChange={(value) => setRole(value as 'student' | 'teacher')}
-        buttons={[
-          { value: 'student', label: 'Student' },
-          { value: 'teacher', label: 'Teacher' },
-        ]}
-        style={styles.segmentedButtons}
-      />
-      
       <TextInput
         label="Username"
-        value={username}
-        onChangeText={setUsername}
+        value={code}
+        onChangeText={setCode}
         style={styles.input}
       />
       <TextInput

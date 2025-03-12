@@ -11,16 +11,12 @@ import CertificateImage from '@/components/CertificateImage';
 const certificateData: Certificate = {
   id: '1',
   name: 'Advanced UI/UX Design',
-  progress: 0.75,
-  icon: '🎨',
   issueDate: '2024-03-10',
   imageUrl: 'https://images.unsplash.com/photo-1545235617-7a424c1a60cc?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
   description: 'Master the art of creating intuitive and beautiful user interfaces. This comprehensive course covers everything from user research and wireframing to high-fidelity prototypes and usability testing.',
 };
 
 export default function CertificateDetail() {
-  const { id } = useLocalSearchParams();
-  const router = useRouter();
   const certificate = certificateData; // In a real app, fetch the certificate based on the id
 
   return (
@@ -43,9 +39,10 @@ export default function CertificateDetail() {
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Your Certificate</Text>
             <CertificateImage
-                          name={certificate.name}
                           issueDate={certificate.issueDate}
-                          recipientName="John Doe" issuer={''}            />
+                          description={certificate.description}
+                          recipientName=''          
+              />
           </View>
 
           <View style={styles.section}>

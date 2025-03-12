@@ -3,17 +3,13 @@ import { View, StyleSheet, Text, Image } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 interface CertificateImageProps {
-  name: string;
   issueDate: string;
-  issuer: string;
   recipientName: string;
   description?: string;
 }
 
 export default function CertificateImage({ 
-  name, 
   issueDate, 
-  issuer, 
   recipientName,
   description = "Congratulations, for your great performance shown during this month.\nWe really appreciate with your contributions."
 }: CertificateImageProps) {
@@ -42,12 +38,9 @@ export default function CertificateImage({
           />
         </View>
 
-        <Text style={styles.presentedText}>This certificate is presented to</Text>
+        <Text style={styles.presentedText}>This is a format of certificate</Text>
         
         <Text style={styles.recipientName}>{recipientName}</Text>
-        
-        <Text style={styles.description}>{description}</Text>
-
         <View style={styles.signatureSection}>
           <View style={styles.signatureLine} />
           <Text style={styles.signatureName}>JULIANA SILVA</Text>
@@ -100,7 +93,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 40,
   },
   title: {
     fontSize: 32,
@@ -120,31 +112,20 @@ const styles = StyleSheet.create({
   presentedText: {
     fontSize: 14,
     color: '#666666',
-    marginBottom: 10,
   },
   recipientName: {
     fontSize: 36,
     fontWeight: '500',
     color: '#000000',
-    fontFamily: 'serif', // You might want to use a custom font here
-    marginBottom: 20,
-  },
-  description: {
-    fontSize: 14,
-    color: '#666666',
-    textAlign: 'center',
-    lineHeight: 20,
-    marginBottom: 40,
+    fontFamily: 'serif',
   },
   signatureSection: {
     alignItems: 'center',
-    marginBottom: 20,
   },
   signatureLine: {
     width: 200,
     height: 1,
     backgroundColor: '#000000',
-    marginBottom: 10,
   },
   signatureName: {
     fontSize: 16,
@@ -154,7 +135,6 @@ const styles = StyleSheet.create({
   signatureTitle: {
     fontSize: 12,
     color: '#666666',
-    marginTop: 5,
   },
   dateText: {
     fontSize: 12,

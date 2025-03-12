@@ -10,7 +10,10 @@ function AuthRedirect() {
 
   useEffect(() => {
     if (user) {
-      if (user.role === 'teacher') {
+      if (user.role === 'TEACHER') {
+        router.replace('/(teacher)');
+      }
+      else if(user.role === 'STUDENT'){
         router.replace('/(teacher)');
       } else {
         router.replace('/(tabs)');
@@ -27,8 +30,8 @@ function RootLayoutNav() {
   return (
     <>
       <Stack>
-        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-        <Stack.Screen name="(app)" options={{ headerShown: false }} />
+        <Stack.Screen name="(auth)/login" options={{ headerShown: false }} />
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="(teacher)" options={{ headerShown: false }} />
       </Stack>
       <AuthRedirect />

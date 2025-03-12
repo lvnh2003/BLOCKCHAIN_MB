@@ -8,7 +8,7 @@ export default function TeacherLayout() {
   const { user } = useAuth();
 
   // Redirect to student layout if user is not a teacher
-  if (user?.role !== 'teacher') {
+  if (user?.role !== 'TEACHER') {
     return null;
   }
 

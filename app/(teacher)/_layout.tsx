@@ -7,7 +7,7 @@ import { useAuth } from '../../context/AuthContext';
 export default function TeacherLayout() {
   const { user } = useAuth();
 
-  if (user?.role !== 'teacher') {
+  if (user?.role !== 'TEACHER') {
     return null;
   }
 
@@ -17,7 +17,7 @@ export default function TeacherLayout() {
         <Tabs.Screen
           name="index"
           options={{
-            title: 'Dashboard',
+            headerShown: false,
             tabBarIcon: ({ color, size }) => (
               <MaterialCommunityIcons name="view-dashboard" color={color} size={size} />
             ),
@@ -26,7 +26,7 @@ export default function TeacherLayout() {
         <Tabs.Screen
           name="qr-scanner"
           options={{
-            title: 'QR Scanner',
+            headerShown: false,
             tabBarIcon: ({ color, size }) => (
               <MaterialCommunityIcons name="qrcode-scan" color={color} size={size} />
             ),

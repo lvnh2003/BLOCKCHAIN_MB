@@ -59,12 +59,6 @@ export default function Certificates() {
             <Text style={styles.cardIcon}>{item.icon}</Text>
             <Text style={styles.cardTitle}>{item.name}</Text>
           </View>
-          <View style={styles.cardFooter}>
-            <View style={styles.progressContainer}>
-              <View style={[styles.progressBar, { width: `${item.progress * 100}%` }]} />
-              <Text style={styles.progressText}>{`${Math.round(item.progress * 100)}%`}</Text>
-            </View>
-          </View>
         </LinearGradient>
       </ImageBackground>
     </TouchableOpacity>

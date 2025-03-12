@@ -1,6 +1,7 @@
 export interface User {
-    username: string;
-    role? : 'student' | 'teacher'
+    code: string;
+    password: string;
+    role? : 'STUDENT' | 'TEACHER' | 'MASTER'
   }
   
   export interface Teacher {

@@ -4,8 +4,10 @@ import { Text, Card, Button, Avatar } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
+import { useAuth } from '@/context/AuthContext';
 
 export default function Home() {
+  const { logout } = useAuth();
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
@@ -69,7 +71,9 @@ export default function Home() {
               { icon: 'calendar', label: 'Schedule' },
               { icon: 'settings', label: 'Settings' },
             ].map((action, index) => (
-              <TouchableOpacity key={index} style={styles.actionButton}>
+              <TouchableOpacity key={index} style={styles.actionButton} onPress={()=>{
+                logout();
+              }}>
                 <Ionicons name={action.icon} size={24} color="#4c669f" />
                 <Text style={styles.actionLabel}>{action.label}</Text>
               </TouchableOpacity>

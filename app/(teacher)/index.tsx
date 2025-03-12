@@ -88,7 +88,7 @@ export default function TeacherDashboard() {
         <View style={styles.headerTop}>
           <View>
             <Text style={styles.welcomeText}>Welcome back,</Text>
-            <Text style={styles.userName}>{user?.username || 'Teacher'}</Text>
+            <Text style={styles.userName}>{user?.code || 'Teacher'}</Text>
           </View>
           <Avatar.Image 
             size={50} 

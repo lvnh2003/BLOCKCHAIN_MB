@@ -20,7 +20,6 @@ const teachersData: Teacher[] = [
     major: 'Business Administration',
     avatar: 'https://i.pravatar.cc/150?img=2',
   },
-  // Add more teachers...
 ];
 
 export default function teachers() {
