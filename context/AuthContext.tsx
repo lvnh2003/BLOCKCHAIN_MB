@@ -3,6 +3,7 @@ import { User } from '../types';
 import { EXPO_PUBLIC_API_URL } from '@env';
 import axios from 'axios';
 import api from '@/api';
+import Toast from 'react-native-toast-message';
 interface AuthContextType {
   user: User | null;
   login: (userData: User) => void;
@@ -26,10 +27,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        console.error("Login failed:", error.response?.data || error.message);
-      } else {
-        console.error("Login failed:", error);
-      }
+        Toast.show({
+          type: "error",
+          text1: "Login Failed",
+          position: "top",
+          visibilityTime: 4000,
+        });
+      } 
+     
       return null;
     }
    

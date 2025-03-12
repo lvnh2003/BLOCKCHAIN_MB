@@ -3,7 +3,7 @@ import { View, StyleSheet, Image } from 'react-native';
 import { TextInput, Button, Title, SegmentedButtons } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../../context/AuthContext';
-
+import Toast from 'react-native-toast-message';
 export default function Login() {
   const [code, setCode] = useState('');
   const [password, setPassword] = useState('');
@@ -39,6 +39,7 @@ export default function Login() {
       <Button mode="contained" onPress={handleLogin} style={styles.button}>
         Login
       </Button>
+      <Toast />
     </View>
   );
 }

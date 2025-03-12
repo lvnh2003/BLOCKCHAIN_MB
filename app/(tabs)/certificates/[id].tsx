@@ -17,6 +17,7 @@ const certificateData: Certificate = {
 };
 
 export default function CertificateDetail() {
+  const router = useRouter();
   const certificate = certificateData; // In a real app, fetch the certificate based on the id
 
   return (
@@ -30,6 +31,14 @@ export default function CertificateDetail() {
             colors={['rgba(0,0,0,0.1)', 'rgba(0,0,0,0.8)']}
             style={styles.headerContent}
           >
+            <Button 
+              icon="arrow-left" 
+              mode="text" 
+              onPress={() => router.back()} 
+              style={styles.backButton}
+            >
+              Back
+            </Button>
             <Text style={styles.headerIcon}>{certificate.icon}</Text>
             <Text style={styles.headerTitle}>{certificate.name}</Text>
           </LinearGradient>
@@ -54,7 +63,7 @@ export default function CertificateDetail() {
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Certificate Details</Text>
             <View style={styles.detailRow}>
-              <Ionicons name="calendar-outline" size={20} color="#666" />
+              <Ionicons name="calendar-outline" size={20} color="#000" />
               <Text style={styles.detailText}>Issued on: {certificate.issueDate}</Text>
             </View>
           </View>
@@ -88,6 +97,13 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'flex-end',
     padding: 20,
+  },
+  backButton: {
+    position: 'absolute',
+    top: 40,
+    left: 20,
+    zIndex: 1,
+    color: '#fff'
   },
   headerIcon: {
     fontSize: 40,
