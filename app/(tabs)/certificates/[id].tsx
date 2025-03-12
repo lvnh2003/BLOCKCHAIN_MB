@@ -5,7 +5,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { Certificate } from '../../../../types';
+import { Certificate } from '../../../types';
 import CertificateImage from '@/components/CertificateImage';
 
 const certificateData: Certificate = {

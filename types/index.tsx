@@ -1,5 +1,6 @@
 export interface User {
     username: string;
+    role? : 'student' | 'teacher'
   }
   
   export interface Teacher {
@@ -14,8 +15,9 @@ export interface User {
     id: string;
     name: string;
     issueDate: string;
-    progress: number;
-    icon: string;
+    progress?: number;
+    icon?: string;
     imageUrl: string;
-    description: string;
+    description?: string;
+    status?: 'signed' | 'pending';
   }
