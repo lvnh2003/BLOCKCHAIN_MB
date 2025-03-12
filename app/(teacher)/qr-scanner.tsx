@@ -7,9 +7,26 @@ import {
   SafeAreaView,
   StatusBar,
   StyleSheet,
+  Dimensions,
 } from "react-native";
-// import { Overlay } from "./Overlay";
+import { Canvas, DiffRect, rect, rrect } from "@shopify/react-native-skia";
 import { useEffect, useRef } from "react";
+
+const { width, height } = Dimensions.get("window");
+
+const outer = rrect(rect(0, 0, width, height), 0, 0);
+const innerDimension = 300;
+
+const inner = rrect(
+  rect(
+    width / 2 - innerDimension / 2,
+    height / 2 - innerDimension / 2,
+    innerDimension,
+    innerDimension
+  ),
+  50,
+  50
+);
 
 export default function Home() {
   const qrLock = useRef(false);
@@ -52,13 +69,15 @@ export default function Home() {
           }
         }}
       />
-      {/* <Canvas
-      style={
-        Platform.OS === "android" ? { flex: 1 } : StyleSheet.absoluteFillObject
-      }
-    >
-      <DiffRect inner={inner} outer={outer} color="black" opacity={0.5} />
-    </Canvas> */}
+      <Canvas
+        style={
+          Platform.OS === "android"
+            ? { flex: 1 }
+            : StyleSheet.absoluteFillObject
+        }
+      >
+        <DiffRect inner={inner} outer={outer} color="black" opacity={0.5} />
+      </Canvas>
     </SafeAreaView>
   );
 }
