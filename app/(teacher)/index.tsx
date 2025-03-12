@@ -189,7 +189,7 @@ export default function TeacherDashboard() {
       <FAB
         style={styles.fab}
         icon="qrcode-scan"
-        // onPress={() => router.push('/qr-scanner')}
+        onPress={() => router.push('/qr-scanner')}
       />
 
       {/* Hộp thoại xác nhận ký chứng chỉ */}
