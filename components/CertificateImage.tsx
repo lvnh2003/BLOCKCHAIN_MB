@@ -3,7 +3,7 @@ import { View, StyleSheet, Text, Image } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 interface CertificateImageProps {
-  issueDate: string;
+  issueDate?: string;
   recipientName: string;
   description?: string;
 }

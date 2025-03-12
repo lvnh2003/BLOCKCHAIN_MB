@@ -39,12 +39,6 @@ export default function Home() {
               <Text style={styles.statsLabel}>Certificates</Text>
             </Card.Content>
           </Card>
-          <Card style={styles.statsCard}>
-            <Card.Content>
-              <Text style={styles.statsNumber}>87%</Text>
-              <Text style={styles.statsLabel}>Completion</Text>
-            </Card.Content>
-          </Card>
         </View>
 
         <View style={styles.section}>
