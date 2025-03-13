@@ -6,8 +6,9 @@ import { View, StyleSheet, ScrollView, Image, TouchableOpacity } from "react-nat
 import { Text, Card, Button, Chip, Divider, DataTable, ActivityIndicator, Dialog, Portal } from "react-native-paper"
 import { SafeAreaView } from "react-native-safe-area-context"
 import { useLocalSearchParams, useRouter } from "expo-router"
-import { Ionicons } from "@expo/vector-icons"
-import type { Certificate, Student } from "@/types"
+import type { CertificateResponeTeacher, Student, StudentOfCertificateResponse } from "@/types"
+import { formatTimestamp } from "@/utils/formatTime"
+import { getAllStudentsOfCertificate } from "@/utils/teacher/getAllStudentOfCertificate"
 
 
 
@@ -15,64 +16,27 @@ export default function CertificateDetailScreen() {
   const { id } = useLocalSearchParams()
   const router = useRouter()
   const [loading, setLoading] = useState(true)
-  const [certificate, setCertificate] = useState<Certificate | null>(null)
-  const [students, setStudents] = useState<Student[]>([])
-  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null)
+  const [students, setStudents] = useState<StudentOfCertificateResponse[]>([])
   const [signDialogVisible, setSignDialogVisible] = useState(false)
+  const params = useLocalSearchParams();
+  const certificateData: CertificateResponeTeacher = JSON.parse(params.certificateData as string);
+
 
   // Fetch certificate and student data
   useEffect(() => {
     // Simulate API call
-    setTimeout(() => {
-      // Mock certificate data
-      const certificateData: Certificate = {
-        id: id as string,
-        createdAt: 123,
-        status: id === "2" ? "SIGNED" : "PENDING",
-        imageUrl:
-          id === "1"
-        ? "https://images.unsplash.com/photo-1545235617-7a424c1a60cc?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
-        : id === "2"
-          ? "https://images.unsplash.com/photo-1498050108023-c5249f4df085?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
-          : "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-        certificateType: {
-          id: id as string,
-          name:
-        id === "1"
-          ? "Advanced UI/UX Design"
-          : id === "2"
-            ? "Web Development Fundamentals"
-            : id === "3"
-          ? "Mobile App Development"
-          : "Data Science Fundamentals",
-        },
-      }
-
-      // Mock student data
-      const studentData: Student[] = [
-        { id: "1", name: "John Doe", score: 92, status: "pending" },
-        { id: "2", name: "Jane Smith", score: 88, status: "pending" },
-        { id: "3", name: "Michael Johnson", score: 95, status: "signed" },
-        { id: "4", name: "Emily Davis", score: 78, status: "pending" },
-        { id: "5", name: "Robert Wilson", score: 85, status: "pending" },
-      ]
-
-      setCertificate(certificateData)
+    const fetchData =  async () => {
+      const studentData: StudentOfCertificateResponse[]  =  await getAllStudentsOfCertificate(certificateData.certificateType);
       setStudents(studentData)
       setLoading(false)
-    }, 1000)
+    }
+    fetchData()
   }, [id])
 
   // Xử lý ký chứng chỉ cho học sinh
   const handleSignForStudent = () => {
     router.push('/qr-scanner');
     setSignDialogVisible(false)
-  }
-
-  // Mở hộp thoại ký cho học sinh
-  const openSignDialog = (student: Student) => {
-    setSelectedStudent(student)
-    setSignDialogVisible(true)
   }
 
   if (loading) {
@@ -83,10 +47,6 @@ export default function CertificateDetailScreen() {
       </SafeAreaView>
     )
   }
-
-  // Tính số học sinh đã ký và chưa ký
-  const signedStudents = students.filter(s => s.status === "signed").length
-  const pendingStudents = students.length - signedStudents
 
   return (
     <SafeAreaView style={styles.container}>
@@ -107,17 +67,18 @@ export default function CertificateDetailScreen() {
         {/* Certificate Information */}
         <Card style={styles.certificateCard}>
           <Card.Content>
-            <Image source={{ uri: certificate?.imageUrl }} style={styles.certificateImage} resizeMode="cover" />
+            <Image source={{ uri: 'https://pngimg.com/uploads/gold_medal/gold_medal_PNG60.png' }} style={styles.certificateImage} resizeMode="contain" />
+            {/* <Image source={{ uri: certificateData.certificate.imageUrl }} style={styles.certificateImage} resizeMode="cover" /> */}
             <View style={styles.certificateHeader}>
-              <Text style={styles.certificateName}>{certificate?.certificateType.name}</Text>
+              <Text style={styles.certificateName}>{certificateData.certificateType.name}</Text>
             </View>
-            <Text style={styles.issueDate}>Issue Date: {certificate?.createdAt}</Text>
+            <Text style={styles.issueDate}>Issue Date: {formatTimestamp(certificateData.certificate.createdAt)}</Text>
 
             <Divider style={styles.divider} />
 
             <Text style={styles.sectionTitle}>Certificate Description</Text>
             <Text style={styles.description}>
-              This certificate validates the successful completion of the {certificate?.certificateType.name} course. The course covers
+              This certificate validates the successful completion of the {certificateData.certificateType.name} course. The course covers
               comprehensive knowledge and practical skills in the subject area. Students have demonstrated proficiency
               through assessments and practical projects.
             </Text>
@@ -147,7 +108,7 @@ export default function CertificateDetailScreen() {
                     <Chip
                       style={[
                         styles.miniStatusChip,
-                        student.status === "signed" ? styles.miniSignedChip : styles.miniPendingChip
+                        student.certificate.status === "SIGNED" ? styles.miniSignedChip : styles.miniPendingChip
                       ]}
                     >
                       {null}
@@ -193,7 +154,7 @@ export default function CertificateDetailScreen() {
             style={styles.actionButton} 
             onPress={() => router.push('/qr-scanner')}
           >
-            Scan QR Code
+            Scan QR Code To Sign
           </Button>
         </View>
       </ScrollView>
@@ -206,9 +167,9 @@ export default function CertificateDetailScreen() {
             <Text style={styles.dialogText}>
               Are you sure you want to sign the certificate for:
             </Text>
-            <Text style={styles.dialogStudentName}>{selectedStudent?.name}</Text>
+            {/* <Text style={styles.dialogStudentName}>{selectedStudent?.name}</Text> */}
             <Text style={styles.dialogCourseInfo}>
-              Course: {certificate?.certificateType.name}
+              Course: {certificateData?.certificateType.name}
             </Text>
             <Text style={styles.dialogWarning}>
               This action cannot be undone.
@@ -268,7 +229,6 @@ const styles = StyleSheet.create({
     width: "100%",
     height: 180,
     borderRadius: 8,
-    marginBottom: 16,
   },
   certificateHeader: {
     flexDirection: "row",

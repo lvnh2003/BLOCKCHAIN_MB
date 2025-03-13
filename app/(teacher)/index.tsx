@@ -1,84 +1,53 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { View, StyleSheet, ScrollView, TouchableOpacity, Image } from "react-native"
 import { Text, Card, Button, Avatar, Chip, Dialog, Portal, Searchbar, FAB, Divider } from "react-native-paper"
 import { SafeAreaView } from "react-native-safe-area-context"
 import { useRouter } from "expo-router"
 import { useAuth } from "../../context/AuthContext"
-import type { Certificate } from "@/types"
+import type { Certificate, CertificateResponeTeacher } from "@/types"
 import { Ionicons } from "@expo/vector-icons"
 import { formatTimestamp } from "@/utils/formatTime"
+import { getAllCertificatesOfTeacher } from "@/utils/teacher/getAllCertificatesOFTeacher"
 
 export default function TeacherDashboard() {
   const { user } = useAuth()
   const router = useRouter()
   const [searchQuery, setSearchQuery] = useState("")
-  const [certificates, setCertificates] = useState<Certificate[]>([
-    {
-      id: "1",
-      createdAt: 123,
-      status: "PENDING",
-      imageUrl:
-        "https://images.unsplash.com/photo-1545235617-7a424c1a60cc?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-      certificateType: {
-        name: "Advanced UI/UX Design",
-      },
-    },
-    {
-      id: "2",
-      createdAt: 123,
-      status: "SIGNED",
-      imageUrl:
-        "https://images.unsplash.com/photo-1498050108023-c5249f4df085?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-      certificateType: {
-        name: "Web Development Fundamentals",
-      },
-    },
-    {
-      id: "3",
-      createdAt: 123      ,
-      status: "PENDING",
-      imageUrl:
-        "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-      certificateType: {
-        name: "Mobile App Development",
-      },
-    },
-    {
-      id: "4",
-      createdAt: 123,
-      status: "PENDING",
-      imageUrl:
-        "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-      certificateType: {
-        name: "Data Science Fundamentals",
-      },
-    },
-  ])
+  const [certificates, setCertificates] = useState<CertificateResponeTeacher[]>();
 
-  const [selectedCertificate, setSelectedCertificate] = useState<Certificate | null>(null)
-  const [signDialogVisible, setSignDialogVisible] = useState(false)
 
-  const filteredCertificates = certificates.filter((cert) =>
-    cert.certificateType.name.toLowerCase().includes(searchQuery.toLowerCase()),
+  useEffect(() => {
+    const fetchCertificates = async () => {
+      try {
+        const mockCertificates: CertificateResponeTeacher[] = await getAllCertificatesOfTeacher(user);
+        setCertificates(mockCertificates);
+      } catch (error) {
+        console.error("Error fetching certificates:", error);
+      } 
+    };
+  
+    fetchCertificates();
+  }, [user]); 
+
+
+  const filteredCertificates = certificates?.filter((cert) =>
+    cert.certificateType?.name.toLowerCase().includes(searchQuery.toLowerCase()),
   )
   // Số lượng chứng chỉ đang chờ ký
-  const pendingCount = certificates.filter((cert) => cert.status === "PENDING").length
+  const pendingCount = certificates?.filter((cert) => cert.certificate.status === "PENDING").length
 
   // Số lượng chứng chỉ đã ký
-  const signedCount = certificates.filter((cert) => cert.status === "SIGNED").length
+  const signedCount = certificates?.filter((cert) => cert.certificate.status === "SIGNED").length
 
 
   // Xem chi tiết chứng chỉ - Navigate to certificate detail page
-  const handleViewCertificate = (certificate: Certificate) => {
-    router.push(`/certificate/${certificate.id}`)
-  }
-
-  // Mở hộp thoại ký chứng chỉ
-  const handleOpenSignDialog = (certificate: Certificate) => {
-    setSelectedCertificate(certificate)
-    setSignDialogVisible(true)
+  const handleViewCertificate = (certificateData: CertificateResponeTeacher) => {
+    router.push({
+      pathname: "/certificate/[id]",
+      params: { id: certificateData.certificate.id, certificateData: JSON.stringify(certificateData) },
+    });
   }
 
   return (
@@ -126,7 +95,7 @@ export default function TeacherDashboard() {
         </Card>
         <Card style={styles.statsCard}>
           <Card.Content>
-            <Text style={styles.statsNumber}>{certificates.length}</Text>
+            <Text style={styles.statsNumber}>{certificates?.length}</Text>
             <Text style={styles.statsLabel}>Total</Text>
           </Card.Content>
         </Card>
@@ -140,16 +109,15 @@ export default function TeacherDashboard() {
       </View>
 
       <ScrollView style={styles.certificateList}>
-        {filteredCertificates.map((certificate: Certificate) => (
-          <Card key={certificate.id} style={styles.certificateCard}>
+        {filteredCertificates?.map((data: CertificateResponeTeacher) => (
+          <Card key={data.certificate.id} style={styles.certificateCard}>
             <Card.Content>
               <View style={styles.cardHeader}>
-                <Image source={{ uri: certificate.imageUrl }} style={styles.certificateImage} />
                 <View style={styles.certificateInfo}>
                   <Text style={styles.certificateName} numberOfLines={1} ellipsizeMode="tail">
-                    {certificate.certificateType.name}
+                    {data.certificateType.name}
                   </Text>
-                  <Text style={styles.issueDate}>Issue Date:  {formatTimestamp(certificate.createdAt)}</Text>
+                  <Text style={styles.issueDate}>Issue Date:  {formatTimestamp(data.certificate.createdAt)}</Text>
                 </View>
               </View>
 
@@ -160,7 +128,7 @@ export default function TeacherDashboard() {
                 <View style={styles.cardActions}>
                   <Button
                     mode="text"
-                    onPress={() => handleViewCertificate(certificate)}
+                    onPress={() => handleViewCertificate(data)}
                     labelStyle={styles.buttonLabel}
                   >
                     View

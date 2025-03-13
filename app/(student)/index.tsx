@@ -37,7 +37,7 @@ export default function StudentDashboard() {
 
   // Filter certificates based on search query
   const filteredCertificates = certificates.filter(
-    cert => cert.certificateType.name.toLowerCase().includes(searchQuery.toLowerCase())
+    cert => cert.certificateType?.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   // Navigate to certificate detail
@@ -119,7 +119,7 @@ export default function StudentDashboard() {
                       <Image source={{ uri: certificate.imageUrl ?? 'https://www.pngall.com/wp-content/uploads/2017/03/Gold-Medal-PNG-Image.png' }} style={styles.certificateImage} />
                       <View style={styles.certificateInfo}>
                         <Text style={styles.certificateName} numberOfLines={1} ellipsizeMode="tail">
-                          {certificate.certificateType.name}
+                          {certificate.certificateType?.name}
                         </Text>
                         <Text style={styles.issueDate}>Issued: {formatTimestamp(certificate.createdAt)}</Text>
                       </View>

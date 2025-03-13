@@ -23,7 +23,7 @@ export default function CertificateDetailScreen() {
   const handleShare = async () => {
     try {
       await Share.share({
-        message: `Check out my ${certificate?.certificateType.name} certificate! Verify it at: ${qrCodeUrl}`,
+        message: `Check out my ${certificate.certificateType?.name} certificate! Verify it at: ${qrCodeUrl}`,
         url: qrCodeUrl,
       })
     } catch (error) {
@@ -63,7 +63,7 @@ export default function CertificateDetailScreen() {
         {/* Certificate Information */}
         <Card style={styles.infoCard}>
           <Card.Content>
-            <Text style={styles.certificateName}>{certificate?.certificateType.name}</Text>
+            <Text style={styles.certificateName}>{certificate.certificateType?.name}</Text>
             <Divider style={styles.divider} />
 
             <View style={styles.detailRow}>

@@ -20,9 +20,9 @@ export interface Certificate {
   imageUrl?: string;
   description?: string;
   status?: "SIGNED" | "PENDING";
-  certificateType : CertificateType;
+  certificateType? : CertificateType;
 }
-interface CertificateType{
+export interface CertificateType{
   id?: string;
   name: string
 }
@@ -31,4 +31,39 @@ export interface Student {
   name: string;
   score: number;
   status: "pending" | "signed";
+}
+
+
+// TEACHER
+
+interface StudentInfoTeacher {
+  id: string;
+  createdAt: number;
+  updatedAt: number;
+  code: string;
+  name: string;
+  password: string;
+  dateOfBirth: string;
+  role: "STUDENT" | "TEACHER" | "MASTER";
+  walletAddress: string;
+  walletPrivateKey: string;
+}
+
+export interface CertificateResponeTeacher {
+  certificate: Certificate,
+  studentInfor: StudentInfoTeacher,
+  certificateType: CertificateType
+}
+
+export interface StudentOfCertificateResponse {
+  id: string;
+  createdAt: number;
+  name: string;
+  score: 99,
+  role: "STUDENT" | "TEACHER" | "MASTER";
+  certificate: {
+    createdAt: number;
+    status: "SIGNED" | "PENDING";
+    certificateTypeId: string;
+  };
 }
