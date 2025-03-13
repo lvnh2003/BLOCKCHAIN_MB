@@ -1,19 +1,15 @@
+// app/(teacher)/certificate/[id].tsx
 "use client"
 
 import { useEffect, useState } from "react"
-import { View, StyleSheet, ScrollView, Image } from "react-native"
-import { Text, Card, Button, Chip, Divider, DataTable, ActivityIndicator } from "react-native-paper"
+import { View, StyleSheet, ScrollView, Image, TouchableOpacity } from "react-native"
+import { Text, Card, Button, Chip, Divider, DataTable, ActivityIndicator, Dialog, Portal } from "react-native-paper"
 import { SafeAreaView } from "react-native-safe-area-context"
 import { useLocalSearchParams, useRouter } from "expo-router"
-import type { Certificate } from "@/types"
+import { Ionicons } from "@expo/vector-icons"
+import type { Certificate, Student } from "@/types"
 
-// Mock student data for the certificate
-interface Student {
-  id: string
-  name: string
-  score: number
-  grade: string
-}
+
 
 export default function CertificateDetailScreen() {
   const { id } = useLocalSearchParams()
@@ -21,6 +17,8 @@ export default function CertificateDetailScreen() {
   const [loading, setLoading] = useState(true)
   const [certificate, setCertificate] = useState<Certificate | null>(null)
   const [students, setStudents] = useState<Student[]>([])
+  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null)
+  const [signDialogVisible, setSignDialogVisible] = useState(false)
 
   // Fetch certificate and student data
   useEffect(() => {
@@ -49,11 +47,11 @@ export default function CertificateDetailScreen() {
 
       // Mock student data
       const studentData: Student[] = [
-        { id: "1", name: "John Doe", score: 92, grade: "A" },
-        { id: "2", name: "Jane Smith", score: 88, grade: "B+" },
-        { id: "3", name: "Michael Johnson", score: 95, grade: "A+" },
-        { id: "4", name: "Emily Davis", score: 78, grade: "C+" },
-        { id: "5", name: "Robert Wilson", score: 85, grade: "B" },
+        { id: "1", name: "John Doe", score: 92, status: "pending" },
+        { id: "2", name: "Jane Smith", score: 88, status: "pending" },
+        { id: "3", name: "Michael Johnson", score: 95, status: "signed" },
+        { id: "4", name: "Emily Davis", score: 78, status: "pending" },
+        { id: "5", name: "Robert Wilson", score: 85, status: "pending" },
       ]
 
       setCertificate(certificateData)
@@ -61,6 +59,18 @@ export default function CertificateDetailScreen() {
       setLoading(false)
     }, 1000)
   }, [id])
+
+  // Xử lý ký chứng chỉ cho học sinh
+  const handleSignForStudent = () => {
+    router.push('/qr-scanner');
+    setSignDialogVisible(false)
+  }
+
+  // Mở hộp thoại ký cho học sinh
+  const openSignDialog = (student: Student) => {
+    setSelectedStudent(student)
+    setSignDialogVisible(true)
+  }
 
   if (loading) {
     return (
@@ -70,6 +80,10 @@ export default function CertificateDetailScreen() {
       </SafeAreaView>
     )
   }
+
+  // Tính số học sinh đã ký và chưa ký
+  const signedStudents = students.filter(s => s.status === "signed").length
+  const pendingStudents = students.length - signedStudents
 
   return (
     <SafeAreaView style={styles.container}>
@@ -93,12 +107,6 @@ export default function CertificateDetailScreen() {
             <Image source={{ uri: certificate?.imageUrl }} style={styles.certificateImage} resizeMode="cover" />
             <View style={styles.certificateHeader}>
               <Text style={styles.certificateName}>{certificate?.name}</Text>
-              <Chip
-                icon={certificate?.status === "signed" ? "check" : "clock"}
-                style={[styles.statusChip, certificate?.status === "signed" ? styles.signedChip : styles.pendingChip]}
-              >
-                {certificate?.status === "signed" ? "Signed" : "Pending"}
-              </Chip>
             </View>
             <Text style={styles.issueDate}>Issue Date: {certificate?.issueDate}</Text>
 
@@ -117,20 +125,31 @@ export default function CertificateDetailScreen() {
         <Card style={styles.studentsCard}>
           <Card.Content>
             <Text style={styles.sectionTitle}>Student Performance</Text>
-            <Text style={styles.subtitle}>Students who received this certificate</Text>
+            <View style={styles.studentStatsRow}>
+              <Text style={styles.subtitle}>Students who received this certificate</Text>
+            </View>
 
             <DataTable>
               <DataTable.Header>
                 <DataTable.Title>Student Name</DataTable.Title>
                 <DataTable.Title numeric>Score</DataTable.Title>
-                <DataTable.Title numeric>Grade</DataTable.Title>
+                <DataTable.Title numeric>Status</DataTable.Title>
               </DataTable.Header>
 
               {students.map((student) => (
                 <DataTable.Row key={student.id}>
                   <DataTable.Cell>{student.name}</DataTable.Cell>
                   <DataTable.Cell numeric>{student.score}</DataTable.Cell>
-                  <DataTable.Cell numeric>{student.grade}</DataTable.Cell>
+                  <DataTable.Cell numeric>
+                    <Chip
+                      style={[
+                        styles.miniStatusChip,
+                        student.status === "signed" ? styles.miniSignedChip : styles.miniPendingChip
+                      ]}
+                    >
+                      {null}
+                    </Chip>
+                  </DataTable.Cell>
                 </DataTable.Row>
               ))}
             </DataTable>
@@ -139,7 +158,7 @@ export default function CertificateDetailScreen() {
               <Card style={styles.statsCard}>
                 <Card.Content>
                   <Text style={styles.statsNumber}>
-                    {students.reduce((sum, student) => sum + student.score, 0) / students.length}
+                    {(students.reduce((sum, student) => sum + student.score, 0) / students.length).toFixed(1)}
                   </Text>
                   <Text style={styles.statsLabel}>Average Score</Text>
                 </Card.Content>
@@ -162,18 +181,42 @@ export default function CertificateDetailScreen() {
 
         {/* Action Buttons */}
         <View style={styles.actionButtons}>
-          {certificate?.status === "pending" && (
-            <Button mode="contained" icon="pencil" style={styles.actionButton} onPress={() => {
-                router.push('/qr-scanner')
-            }}>
-              Sign Certificate
-            </Button>
-          )}
           <Button mode="outlined" icon="share-variant" style={styles.actionButton} onPress={() => {}}>
             Share Certificate
           </Button>
+          <Button 
+            mode="contained" 
+            icon="qrcode-scan" 
+            style={styles.actionButton} 
+            onPress={() => router.push('/qr-scanner')}
+          >
+            Scan QR Code
+          </Button>
         </View>
       </ScrollView>
+
+      {/* Hộp thoại xác nhận ký chứng chỉ cho học sinh */}
+      <Portal>
+        <Dialog visible={signDialogVisible} onDismiss={() => setSignDialogVisible(false)}>
+          <Dialog.Title>Sign Certificate</Dialog.Title>
+          <Dialog.Content>
+            <Text style={styles.dialogText}>
+              Are you sure you want to sign the certificate for:
+            </Text>
+            <Text style={styles.dialogStudentName}>{selectedStudent?.name}</Text>
+            <Text style={styles.dialogCourseInfo}>
+              Course: {certificate?.name}
+            </Text>
+            <Text style={styles.dialogWarning}>
+              This action cannot be undone.
+            </Text>
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button onPress={() => setSignDialogVisible(false)}>Cancel</Button>
+            <Button onPress={handleSignForStudent} mode="contained">Sign</Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
     </SafeAreaView>
   )
 }
@@ -269,10 +312,45 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     elevation: 4,
   },
+  studentStatsRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  studentStatusContainer: {
+    flexDirection: "row",
+    gap: 8,
+  },
   subtitle: {
     fontSize: 14,
     color: "#666",
-    marginBottom: 16,
+  },
+  miniStatusChip: {
+    height: 24,
+    paddingHorizontal: 4,
+  },
+  miniSignedChip: {
+    backgroundColor: "#2ecc71",
+    height: 24,
+  },
+  miniPendingChip: {
+    backgroundColor: "#f39c12",
+    height: 24,
+  },
+  signButton: {
+    backgroundColor: "#3498db",
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  signedIndicator: {
+    width: 32,
+    height: 32,
+    justifyContent: "center",
+    alignItems: "center",
   },
   statsContainer: {
     flexDirection: "row",
@@ -300,5 +378,27 @@ const styles = StyleSheet.create({
   actionButton: {
     marginBottom: 12,
   },
+  dialogText: {
+    fontSize: 16,
+    marginBottom: 12,
+  },
+  dialogStudentName: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 12,
+    color: "#333",
+  },
+  dialogCourseInfo: {
+    fontSize: 14,
+    marginBottom: 8,
+  },
+  dialogScoreInfo: {
+    fontSize: 14,
+    marginBottom: 16,
+  },
+  dialogWarning: {
+    fontSize: 14,
+    color: "#e74c3c",
+    fontStyle: "italic",
+  },
 })
-

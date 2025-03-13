@@ -154,12 +154,6 @@ export default function TeacherDashboard() {
               <Divider style={styles.divider} />
 
               <View style={styles.cardFooter}>
-                <Chip
-                  icon={certificate.status === "signed" ? "check" : "clock"}
-                  style={[styles.statusChip, certificate.status === "signed" ? styles.signedChip : styles.pendingChip]}
-                >
-                  {certificate.status === "signed" ? "Signed" : "Pending"}
-                </Chip>
 
                 <View style={styles.cardActions}>
                   <Button
