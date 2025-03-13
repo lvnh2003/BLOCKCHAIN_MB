@@ -10,10 +10,16 @@ export default function Login() {
   const router = useRouter();
   const { login } = useAuth();
 
-  const handleLogin = () => {
-    login({ code, password });
-    router.replace('/');
+  const handleLogin = async () => {
+    const success = await login({ code, password });
+  
+    if (success) {
+      router.replace('/');
+    }
   };
+  
+  
+  
 
   return (
     <View style={styles.container}>
@@ -36,7 +42,7 @@ export default function Login() {
         secureTextEntry
         style={styles.input}
       />
-      <Button mode="contained" onPress={handleLogin} style={styles.button}>
+      <Button mode="contained" onPress= {handleLogin} style={styles.button}>
         Login
       </Button>
       <Toast />

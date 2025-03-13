@@ -7,6 +7,7 @@ import { SafeAreaView } from "react-native-safe-area-context"
 import { useRouter } from "expo-router"
 import { useAuth } from "../../context/AuthContext"
 import type { Certificate } from "@/types"
+import { Ionicons } from "@expo/vector-icons"
 
 export default function TeacherDashboard() {
   const { user } = useAuth()
@@ -86,6 +87,15 @@ export default function TeacherDashboard() {
             <Text style={styles.welcomeText}>Welcome back,</Text>
             <Text style={styles.userName}>{user?.code || "Teacher"}</Text>
           </View>
+          <TouchableOpacity
+              style={styles.logoutButton}
+              onPress={() => {
+                router.replace('/login');
+              }}
+            >
+              <Ionicons name="log-out-outline" size={22} color="#fff" />
+              <Text style={styles.logoutText}>Logout</Text>
+            </TouchableOpacity>
           <Avatar.Image size={50} source={{ uri: "https://i.pravatar.cc/300" }} />
         </View>
         <Searchbar
@@ -159,16 +169,6 @@ export default function TeacherDashboard() {
                   >
                     View
                   </Button>
-                  {/* {certificate.status === "pending" && (
-                    <Button
-                      mode="contained"
-                      onPress={() => handleOpenSignDialog(certificate)}
-                      style={styles.signButton}
-                      labelStyle={styles.signButtonLabel}
-                    >
-                      Sign
-                    </Button>
-                  )} */}
                 </View>
               </View>
             </Card.Content>
@@ -326,6 +326,25 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 16,
     marginVertical: 10,
+  },
+  headerActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 16,
+  },
+  logoutButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+  },
+  logoutText: {
+    color: "#fff",
+    marginLeft: 4,
+    fontSize: 12,
+    fontWeight: "500",
   },
 })
 

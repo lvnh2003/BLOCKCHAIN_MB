@@ -4,7 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 
 interface CertificateImageProps {
   issueDate?: string;
-  recipientName: string;
+  recipientName?: string;
   description?: string;
 }
 
@@ -38,13 +38,12 @@ export default function CertificateImage({
           />
         </View>
 
-        <Text style={styles.presentedText}>This is a format of certificate</Text>
+        <Text style={styles.presentedText}>We really appreciate with your contributions.</Text>
         
         <Text style={styles.recipientName}>{recipientName}</Text>
         <View style={styles.signatureSection}>
           <View style={styles.signatureLine} />
-          <Text style={styles.signatureName}>JULIANA SILVA</Text>
-          <Text style={styles.signatureTitle}>GENERAL MANAGER</Text>
+          <Text style={styles.signatureName}>VKU</Text>
         </View>
 
         <Text style={styles.dateText}>{issueDate}</Text>
@@ -114,10 +113,11 @@ const styles = StyleSheet.create({
     color: '#666666',
   },
   recipientName: {
-    fontSize: 36,
+    fontSize: 25,
     fontWeight: '500',
     color: '#000000',
     fontFamily: 'serif',
+    marginBottom:10
   },
   signatureSection: {
     alignItems: 'center',
@@ -126,6 +126,7 @@ const styles = StyleSheet.create({
     width: 200,
     height: 1,
     backgroundColor: '#000000',
+    marginTop:10
   },
   signatureName: {
     fontSize: 16,

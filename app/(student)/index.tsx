@@ -67,7 +67,7 @@ export default function StudentDashboard() {
         <View style={styles.headerTop}>
           <View>
             <Text style={styles.welcomeText}>Hello,</Text>
-            <Text style={styles.userName}>{user?.code || 'Student'}</Text>
+            <Text style={styles.userName}>{user?.name || 'Student'}</Text>
           </View>
           <View style={styles.headerActions}>
             <TouchableOpacity
@@ -77,7 +77,6 @@ export default function StudentDashboard() {
               }}
             >
               <Ionicons name="log-out-outline" size={22} color="#fff" />
-              <Text style={styles.logoutText}>Logout</Text>
             </TouchableOpacity>
             <Avatar.Image size={50} source={{ uri: "https://i.pravatar.cc/300" }} />
           </View>

@@ -8,13 +8,14 @@ import { useLocalSearchParams, useRouter } from "expo-router"
 import QRCode from "react-native-qrcode-svg"
 import { Certificate } from "@/types"
 import CertificateImage from "@/components/CertificateImage"
+import { useAuth } from "@/context/AuthContext"
 
 export default function CertificateDetailScreen() {
   const { id } = useLocalSearchParams()
   const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [certificate, setCertificate] = useState<Certificate | null>(null)
-
+  const { user } = useAuth();
   // QR code URL (temporary using google.com)
   const qrCodeUrl = `https://google.com?certificate=${id}`
 
@@ -95,7 +96,7 @@ export default function CertificateDetailScreen() {
           <CertificateImage
             issueDate={certificate?.issueDate}
             description={certificate?.description}
-            recipientName=''          
+            recipientName={user?.name}          
                         />
         </Card>
 
