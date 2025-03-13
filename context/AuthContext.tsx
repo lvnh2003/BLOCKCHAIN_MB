@@ -1,6 +1,5 @@
 import React, { createContext, useState, useContext, ReactNode } from 'react';
 import { User } from '../types';
-import { EXPO_PUBLIC_API_URL } from '@env';
 import axios from 'axios';
 import api from '@/api';
 import Toast from 'react-native-toast-message';
