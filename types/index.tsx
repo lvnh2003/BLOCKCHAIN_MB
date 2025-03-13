@@ -19,8 +19,9 @@ export interface Certificate {
   createdAt: number;
   imageUrl?: string;
   description?: string;
-  status?: "SIGNED" | "PENDING";
+  status?: "SIGNED" | "PENDING" | "APPROVED";
   certificateType? : CertificateType;
+  certId? : string;
 }
 export interface CertificateType{
   id?: string;

@@ -14,6 +14,8 @@ import { formatTimestamp } from "@/utils/formatTime"
 import { StatusBar } from "expo-status-bar"
 import { LinearGradient } from "expo-linear-gradient"
 import { Ionicons, MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons'
+import { scanCertificate } from "@/utils/student/scanCertificate"
+import { getCertificateById } from "@/utils/student/getCertificateById"
 
 const { width, height } = Dimensions.get('window')
 
@@ -23,10 +25,24 @@ export default function CertificateDetailScreen() {
   const { user } = useAuth()
   const [isLoading, setIsLoading] = useState(false)
   const [showFullCertificate, setShowFullCertificate] = useState(false)
-  
-  // QR code URL (temporary using google.com)
-  const qrCodeUrl = `https://google.com?certificate=${id}/studentId=${user?.id}`
+
+ 
   const params = useLocalSearchParams()
+  
+
+  const [returnValue, setReturnValue] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    const fetchReturnValue = async () => {
+      const certificateData: any =  await getCertificateById(Array.isArray(params?.id) ? params.id[0] : params?.id);
+      console.log(certificateData);
+      
+      const result = await scanCertificate(certificateData.certId);
+      setReturnValue(result);
+    };
+    fetchReturnValue();
+  }, []);
+   
   const certificate: Certificate = JSON.parse(params.certificate as string)
 
   // Share certificate
@@ -34,8 +50,8 @@ export default function CertificateDetailScreen() {
     try {
       setIsLoading(true)
       await Share.share({
-        message: `Check out my ${certificate.certificateType?.name} certificate! Verify it at: ${qrCodeUrl}`,
-        url: qrCodeUrl,
+        message: `Check out my ${certificate.certificateType?.name} certificate! Verify it at: ${returnValue}`,
+        url: returnValue,
       })
     } catch (error) {
       console.error("Error sharing certificate:", error)
@@ -46,7 +62,8 @@ export default function CertificateDetailScreen() {
 
   // Open verification link
   const handleVerify = () => {
-    Linking.openURL(qrCodeUrl)
+    console.log(returnValue);
+    
   }
 
   // Toggle full certificate view
@@ -210,7 +227,7 @@ export default function CertificateDetailScreen() {
             <View style={styles.qrCodeWrapper}>
               <View style={styles.qrCodeContainer}>
                 <QRCode 
-                  value={qrCodeUrl} 
+                  value={returnValue} 
                   size={180} 
                   color="#000" 
                   backgroundColor="#fff"

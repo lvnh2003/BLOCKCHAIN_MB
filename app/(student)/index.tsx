@@ -27,8 +27,8 @@ export default function StudentDashboard() {
     setLoading(true);
     try {
       const mockCertificates: Certificate[] = await getAllCertificates(user);
-      // const signedCertificates = mockCertificates.filter(cert => cert.status === "SIGNED");
-      setCertificates(mockCertificates);
+      const signedCertificates = mockCertificates.filter(cert => cert.status === "APPROVED");
+      setCertificates(signedCertificates);
     } catch (error) {
       console.error("Error fetching certificates:", error);
     } finally {
