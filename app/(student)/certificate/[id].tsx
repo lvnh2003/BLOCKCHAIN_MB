@@ -9,48 +9,16 @@ import QRCode from "react-native-qrcode-svg"
 import { Certificate } from "@/types"
 import CertificateImage from "@/components/CertificateImage"
 import { useAuth } from "@/context/AuthContext"
+import { formatTimestamp } from "@/utils/formatTime"
 
 export default function CertificateDetailScreen() {
   const { id } = useLocalSearchParams()
   const router = useRouter()
-  const [loading, setLoading] = useState(true)
-  const [certificate, setCertificate] = useState<Certificate | null>(null)
   const { user } = useAuth();
   // QR code URL (temporary using google.com)
-  const qrCodeUrl = `https://google.com?certificate=${id}`
-
-  // Fetch certificate data
-  useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      // Mock certificate data
-      const certificateData: Certificate = {
-        id: id as string,
-        createdAt: id === "1" ? "2024-03-10" : id === "2" ? "2024-02-15" : id === "3" ? "2024-01-20" : "2023-12-05",
-        imageUrl:
-          id === "1"
-        ? "https://images.unsplash.com/photo-1545235617-7a424c1a60cc?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
-        : id === "2"
-          ? "https://images.unsplash.com/photo-1498050108023-c5249f4df085?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" : '',
-        description:
-          "This certificate validates the successful completion of the course with demonstrated proficiency in all required skills and knowledge areas.",
-        certificateType: {
-          name:
-        id === "1"
-          ? "Advanced UI/UX Design"
-          : id === "2"
-            ? "Web Development Fundamentals"
-            : id === "3"
-          ? "Mobile App Development"
-          : "Data Science Fundamentals",
-        },
-      }
-
-      setCertificate(certificateData)
-      setLoading(false)
-    }, 1000)
-  }, [id])
-
+  const qrCodeUrl = `https://google.com?certificate=${id}/studentId=${user?.id}`
+  const params = useLocalSearchParams();
+  const certificate: Certificate = JSON.parse(params.certificate as string);
   // Share certificate
   const handleShare = async () => {
     try {
@@ -67,16 +35,6 @@ export default function CertificateDetailScreen() {
   const handleVerify = () => {
     Linking.openURL(qrCodeUrl)
   }
-
-  if (loading) {
-    return (
-      <SafeAreaView style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#4CAF50" />
-        <Text style={styles.loadingText}>Loading certificate details...</Text>
-      </SafeAreaView>
-    )
-  }
-
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
@@ -96,7 +54,7 @@ export default function CertificateDetailScreen() {
         {/* Certificate Image */}
         <Card style={styles.certificateImageCard}>
           <CertificateImage
-            issueDate={certificate?.createdAt}
+            issueDate={certificate?.createdAt ? formatTimestamp(certificate.createdAt) : 'N/A'}
             description={certificate?.description}
             recipientName={user?.name}          
                         />
@@ -111,7 +69,7 @@ export default function CertificateDetailScreen() {
             <View style={styles.detailRow}>
               <View style={styles.detailItem}>
                 <Text style={styles.detailLabel}>Issue Date</Text>
-                <Text style={styles.detailValue}>{certificate?.createdAt}</Text>
+                <Text style={styles.detailValue}>{formatTimestamp(certificate?.createdAt)}</Text>
               </View>
             </View>
 

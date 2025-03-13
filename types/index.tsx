@@ -16,7 +16,7 @@ export interface Teacher {
 
 export interface Certificate {
   id: string;
-  createdAt: string;
+  createdAt: number;
   imageUrl?: string;
   description?: string;
   status?: "SIGNED" | "PENDING";

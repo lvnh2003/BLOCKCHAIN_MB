@@ -6,10 +6,12 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../context/AuthContext';
 import { Certificate } from '@/types';
+import { getAllCertificates } from '@/utils/student/getAllCertificates';
+import { formatTimestamp } from '@/utils/formatTime';
 
 
 export default function StudentDashboard() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [certificates, setCertificates] = useState<Certificate[]>([]);
@@ -17,38 +19,21 @@ export default function StudentDashboard() {
 
   // Fetch student certificates
   useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      const mockCertificates: Certificate[] = [
-        {
-          id: '1',
-          createdAt: '2024-03-10',
-          certificateType: { name: 'Advanced UI/UX Design' },
-          imageUrl: 'https://images.unsplash.com/photo-1545235617-7a424c1a60cc?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-        },
-        {
-          id: '2',
-          createdAt: '2024-02-15',
-          certificateType: { name: 'Web Development Fundamentals' },
-          imageUrl: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-        },
-        {
-          id: '3',
-          createdAt: '2024-01-20',
-          certificateType: { name: 'Mobile App Development' },
-          imageUrl: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-        },
-        {
-          id: '4',
-          createdAt: '2023-12-05',
-          certificateType: { name: 'Data Science Fundamentals' },
-          imageUrl: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-        },
-      ];
-      setCertificates(mockCertificates);
-      setLoading(false);
-    }, 1000);
-  }, []);
+    const fetchCertificates = async () => {
+      setLoading(true);
+      try {
+        const mockCertificates: Certificate[] = await getAllCertificates(user);
+        const signedCertificates = mockCertificates.filter(cert => cert.status === "SIGNED");
+        setCertificates(signedCertificates);
+      } catch (error) {
+        console.error("Error fetching certificates:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+  
+    fetchCertificates();
+  }, [user]); 
 
   // Filter certificates based on search query
   const filteredCertificates = certificates.filter(
@@ -57,7 +42,10 @@ export default function StudentDashboard() {
 
   // Navigate to certificate detail
   const handleViewCertificate = (certificate: Certificate) => {
-    router.push(`/certificate/${certificate.id}`);
+    router.push({
+      pathname: "/certificate/[id]",
+      params: { id: certificate.id, certificate: JSON.stringify(certificate) },
+    });
   };
 
   return (
@@ -72,7 +60,7 @@ export default function StudentDashboard() {
             <TouchableOpacity
               style={styles.logoutButton}
               onPress={() => {
-                router.replace('/login');
+                  logout();
               }}
             >
               <Ionicons name="log-out-outline" size={22} color="#fff" />
@@ -128,12 +116,12 @@ export default function StudentDashboard() {
                 <Card style={styles.certificateCard}>
                   <Card.Content>
                     <View style={styles.cardHeader}>
-                      <Image source={{ uri: certificate.imageUrl }} style={styles.certificateImage} />
+                      <Image source={{ uri: certificate.imageUrl ?? 'https://www.pngall.com/wp-content/uploads/2017/03/Gold-Medal-PNG-Image.png' }} style={styles.certificateImage} />
                       <View style={styles.certificateInfo}>
                         <Text style={styles.certificateName} numberOfLines={1} ellipsizeMode="tail">
                           {certificate.certificateType.name}
                         </Text>
-                        <Text style={styles.issueDate}>Issued: {certificate.createdAt}</Text>
+                        <Text style={styles.issueDate}>Issued: {formatTimestamp(certificate.createdAt)}</Text>
                       </View>
                     </View>
                   </Card.Content>

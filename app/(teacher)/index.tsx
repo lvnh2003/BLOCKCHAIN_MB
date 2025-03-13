@@ -8,6 +8,7 @@ import { useRouter } from "expo-router"
 import { useAuth } from "../../context/AuthContext"
 import type { Certificate } from "@/types"
 import { Ionicons } from "@expo/vector-icons"
+import { formatTimestamp } from "@/utils/formatTime"
 
 export default function TeacherDashboard() {
   const { user } = useAuth()
@@ -16,7 +17,7 @@ export default function TeacherDashboard() {
   const [certificates, setCertificates] = useState<Certificate[]>([
     {
       id: "1",
-      createdAt: "2024-03-10",
+      createdAt: 123,
       status: "PENDING",
       imageUrl:
         "https://images.unsplash.com/photo-1545235617-7a424c1a60cc?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
@@ -26,7 +27,7 @@ export default function TeacherDashboard() {
     },
     {
       id: "2",
-      createdAt: "2024-03-15",
+      createdAt: 123,
       status: "SIGNED",
       imageUrl:
         "https://images.unsplash.com/photo-1498050108023-c5249f4df085?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
@@ -36,7 +37,7 @@ export default function TeacherDashboard() {
     },
     {
       id: "3",
-      createdAt: "2024-03-20",
+      createdAt: 123      ,
       status: "PENDING",
       imageUrl:
         "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
@@ -46,7 +47,7 @@ export default function TeacherDashboard() {
     },
     {
       id: "4",
-      createdAt: "2024-03-25",
+      createdAt: 123,
       status: "PENDING",
       imageUrl:
         "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
@@ -68,15 +69,6 @@ export default function TeacherDashboard() {
   // Số lượng chứng chỉ đã ký
   const signedCount = certificates.filter((cert) => cert.status === "SIGNED").length
 
-  // Xử lý ký chứng chỉ
-  const handleSignCertificate = () => {
-    if (selectedCertificate) {
-      setCertificates((prevCerts) =>
-        prevCerts.map((cert) => (cert.id === selectedCertificate.id ? { ...cert, status: "SIGNED" } : cert)),
-      )
-      setSignDialogVisible(false)
-    }
-  }
 
   // Xem chi tiết chứng chỉ - Navigate to certificate detail page
   const handleViewCertificate = (certificate: Certificate) => {
@@ -157,7 +149,7 @@ export default function TeacherDashboard() {
                   <Text style={styles.certificateName} numberOfLines={1} ellipsizeMode="tail">
                     {certificate.certificateType.name}
                   </Text>
-                  <Text style={styles.issueDate}>Issue Date: {certificate.createdAt}</Text>
+                  <Text style={styles.issueDate}>Issue Date:  {formatTimestamp(certificate.createdAt)}</Text>
                 </View>
               </View>
 

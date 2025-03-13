@@ -27,7 +27,7 @@ export default function CertificateDetailScreen() {
       // Mock certificate data
       const certificateData: Certificate = {
         id: id as string,
-        createdAt: id === "1" ? "2024-03-10" : id === "2" ? "2024-03-15" : id === "3" ? "2024-03-20" : "2024-03-25",
+        createdAt: 123,
         status: id === "2" ? "SIGNED" : "PENDING",
         imageUrl:
           id === "1"

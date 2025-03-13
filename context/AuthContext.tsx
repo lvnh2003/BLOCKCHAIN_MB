@@ -23,7 +23,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const userResponse = await api.get(`/users/code/${userData.code}`);
       setUser(userResponse.data);
       
-      
       return true; 
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -36,7 +35,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         });
       }
   
-      return false; // ✅ Trả về false nếu đăng nhập thất bại
+      return false; 
     }
   };
 
