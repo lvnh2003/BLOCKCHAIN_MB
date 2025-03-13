@@ -26,22 +26,24 @@ export default function CertificateDetailScreen() {
       // Mock certificate data
       const certificateData: Certificate = {
         id: id as string,
-        name:
-          id === "1"
-            ? "Advanced UI/UX Design"
-            : id === "2"
-              ? "Web Development Fundamentals"
-              : id === "3"
-                ? "Mobile App Development"
-                : "Data Science Fundamentals",
-        issueDate: id === "1" ? "2024-03-10" : id === "2" ? "2024-02-15" : id === "3" ? "2024-01-20" : "2023-12-05",
+        createdAt: id === "1" ? "2024-03-10" : id === "2" ? "2024-02-15" : id === "3" ? "2024-01-20" : "2023-12-05",
         imageUrl:
           id === "1"
-            ? "https://images.unsplash.com/photo-1545235617-7a424c1a60cc?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
-            : id === "2"
-              ? "https://images.unsplash.com/photo-1498050108023-c5249f4df085?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" : '',
+        ? "https://images.unsplash.com/photo-1545235617-7a424c1a60cc?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
+        : id === "2"
+          ? "https://images.unsplash.com/photo-1498050108023-c5249f4df085?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" : '',
         description:
           "This certificate validates the successful completion of the course with demonstrated proficiency in all required skills and knowledge areas.",
+        certificateType: {
+          name:
+        id === "1"
+          ? "Advanced UI/UX Design"
+          : id === "2"
+            ? "Web Development Fundamentals"
+            : id === "3"
+          ? "Mobile App Development"
+          : "Data Science Fundamentals",
+        },
       }
 
       setCertificate(certificateData)
@@ -53,7 +55,7 @@ export default function CertificateDetailScreen() {
   const handleShare = async () => {
     try {
       await Share.share({
-        message: `Check out my ${certificate?.name} certificate! Verify it at: ${qrCodeUrl}`,
+        message: `Check out my ${certificate?.certificateType.name} certificate! Verify it at: ${qrCodeUrl}`,
         url: qrCodeUrl,
       })
     } catch (error) {
@@ -94,7 +96,7 @@ export default function CertificateDetailScreen() {
         {/* Certificate Image */}
         <Card style={styles.certificateImageCard}>
           <CertificateImage
-            issueDate={certificate?.issueDate}
+            issueDate={certificate?.createdAt}
             description={certificate?.description}
             recipientName={user?.name}          
                         />
@@ -103,13 +105,13 @@ export default function CertificateDetailScreen() {
         {/* Certificate Information */}
         <Card style={styles.infoCard}>
           <Card.Content>
-            <Text style={styles.certificateName}>{certificate?.name}</Text>
+            <Text style={styles.certificateName}>{certificate?.certificateType.name}</Text>
             <Divider style={styles.divider} />
 
             <View style={styles.detailRow}>
               <View style={styles.detailItem}>
                 <Text style={styles.detailLabel}>Issue Date</Text>
-                <Text style={styles.detailValue}>{certificate?.issueDate}</Text>
+                <Text style={styles.detailValue}>{certificate?.createdAt}</Text>
               </View>
             </View>
 

@@ -27,22 +27,25 @@ export default function CertificateDetailScreen() {
       // Mock certificate data
       const certificateData: Certificate = {
         id: id as string,
-        name:
-          id === "1"
-            ? "Advanced UI/UX Design"
-            : id === "2"
-              ? "Web Development Fundamentals"
-              : id === "3"
-                ? "Mobile App Development"
-                : "Data Science Fundamentals",
-        issueDate: id === "1" ? "2024-03-10" : id === "2" ? "2024-03-15" : id === "3" ? "2024-03-20" : "2024-03-25",
-        status: id === "2" ? "signed" : "pending",
+        createdAt: id === "1" ? "2024-03-10" : id === "2" ? "2024-03-15" : id === "3" ? "2024-03-20" : "2024-03-25",
+        status: id === "2" ? "SIGNED" : "PENDING",
         imageUrl:
           id === "1"
-            ? "https://images.unsplash.com/photo-1545235617-7a424c1a60cc?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
-            : id === "2"
-              ? "https://images.unsplash.com/photo-1498050108023-c5249f4df085?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
-              : "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
+        ? "https://images.unsplash.com/photo-1545235617-7a424c1a60cc?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
+        : id === "2"
+          ? "https://images.unsplash.com/photo-1498050108023-c5249f4df085?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
+          : "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
+        certificateType: {
+          id: id as string,
+          name:
+        id === "1"
+          ? "Advanced UI/UX Design"
+          : id === "2"
+            ? "Web Development Fundamentals"
+            : id === "3"
+          ? "Mobile App Development"
+          : "Data Science Fundamentals",
+        },
       }
 
       // Mock student data
@@ -106,15 +109,15 @@ export default function CertificateDetailScreen() {
           <Card.Content>
             <Image source={{ uri: certificate?.imageUrl }} style={styles.certificateImage} resizeMode="cover" />
             <View style={styles.certificateHeader}>
-              <Text style={styles.certificateName}>{certificate?.name}</Text>
+              <Text style={styles.certificateName}>{certificate?.certificateType.name}</Text>
             </View>
-            <Text style={styles.issueDate}>Issue Date: {certificate?.issueDate}</Text>
+            <Text style={styles.issueDate}>Issue Date: {certificate?.createdAt}</Text>
 
             <Divider style={styles.divider} />
 
             <Text style={styles.sectionTitle}>Certificate Description</Text>
             <Text style={styles.description}>
-              This certificate validates the successful completion of the {certificate?.name} course. The course covers
+              This certificate validates the successful completion of the {certificate?.certificateType.name} course. The course covers
               comprehensive knowledge and practical skills in the subject area. Students have demonstrated proficiency
               through assessments and practical projects.
             </Text>
@@ -205,7 +208,7 @@ export default function CertificateDetailScreen() {
             </Text>
             <Text style={styles.dialogStudentName}>{selectedStudent?.name}</Text>
             <Text style={styles.dialogCourseInfo}>
-              Course: {certificate?.name}
+              Course: {certificate?.certificateType.name}
             </Text>
             <Text style={styles.dialogWarning}>
               This action cannot be undone.

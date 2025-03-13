@@ -16,33 +16,43 @@ export default function TeacherDashboard() {
   const [certificates, setCertificates] = useState<Certificate[]>([
     {
       id: "1",
-      name: "Advanced UI/UX Design",
-      issueDate: "2024-03-10",
-      status: "pending",
+      createdAt: "2024-03-10",
+      status: "PENDING",
       imageUrl:
         "https://images.unsplash.com/photo-1545235617-7a424c1a60cc?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
+      certificateType: {
+        name: "Advanced UI/UX Design",
+      },
     },
     {
       id: "2",
-      name: "Web Development Fundamentals",
-      issueDate: "2024-03-15",
-      status: "signed",
+      createdAt: "2024-03-15",
+      status: "SIGNED",
       imageUrl:
         "https://images.unsplash.com/photo-1498050108023-c5249f4df085?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
+      certificateType: {
+        name: "Web Development Fundamentals",
+      },
     },
     {
       id: "3",
-      name: "Mobile App Development",
-      issueDate: "2024-03-20",
+      createdAt: "2024-03-20",
+      status: "PENDING",
       imageUrl:
         "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
+      certificateType: {
+        name: "Mobile App Development",
+      },
     },
     {
       id: "4",
-      name: "Data Science Fundamentals",
-      issueDate: "2024-03-25",
+      createdAt: "2024-03-25",
+      status: "PENDING",
       imageUrl:
         "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
+      certificateType: {
+        name: "Data Science Fundamentals",
+      },
     },
   ])
 
@@ -50,19 +60,19 @@ export default function TeacherDashboard() {
   const [signDialogVisible, setSignDialogVisible] = useState(false)
 
   const filteredCertificates = certificates.filter((cert) =>
-    cert.name.toLowerCase().includes(searchQuery.toLowerCase()),
+    cert.certificateType.name.toLowerCase().includes(searchQuery.toLowerCase()),
   )
   // Số lượng chứng chỉ đang chờ ký
-  const pendingCount = certificates.filter((cert) => cert.status === "pending").length
+  const pendingCount = certificates.filter((cert) => cert.status === "PENDING").length
 
   // Số lượng chứng chỉ đã ký
-  const signedCount = certificates.filter((cert) => cert.status === "signed").length
+  const signedCount = certificates.filter((cert) => cert.status === "SIGNED").length
 
   // Xử lý ký chứng chỉ
   const handleSignCertificate = () => {
     if (selectedCertificate) {
       setCertificates((prevCerts) =>
-        prevCerts.map((cert) => (cert.id === selectedCertificate.id ? { ...cert, status: "signed" } : cert)),
+        prevCerts.map((cert) => (cert.id === selectedCertificate.id ? { ...cert, status: "SIGNED" } : cert)),
       )
       setSignDialogVisible(false)
     }
@@ -85,7 +95,7 @@ export default function TeacherDashboard() {
         <View style={styles.headerTop}>
           <View>
             <Text style={styles.welcomeText}>Welcome back,</Text>
-            <Text style={styles.userName}>{user?.code || "Teacher"}</Text>
+            <Text style={styles.userName}>{user?.name || "Teacher"}</Text>
           </View>
           <TouchableOpacity
               style={styles.logoutButton}
@@ -145,9 +155,9 @@ export default function TeacherDashboard() {
                 <Image source={{ uri: certificate.imageUrl }} style={styles.certificateImage} />
                 <View style={styles.certificateInfo}>
                   <Text style={styles.certificateName} numberOfLines={1} ellipsizeMode="tail">
-                    {certificate.name}
+                    {certificate.certificateType.name}
                   </Text>
-                  <Text style={styles.issueDate}>Issue Date: {certificate.issueDate}</Text>
+                  <Text style={styles.issueDate}>Issue Date: {certificate.createdAt}</Text>
                 </View>
               </View>
 

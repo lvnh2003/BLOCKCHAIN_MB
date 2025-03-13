@@ -3,6 +3,7 @@ export interface User {
   password: string;
   role?: "STUDENT" | "TEACHER" | "MASTER";
   name?: string;
+  id?: string;
 }
 
 export interface Teacher {
@@ -15,15 +16,16 @@ export interface Teacher {
 
 export interface Certificate {
   id: string;
-  name: string;
-  issueDate: string;
-  progress?: number;
-  icon?: string;
-  imageUrl: string;
+  createdAt: string;
+  imageUrl?: string;
   description?: string;
-  status?: "signed" | "pending";
+  status?: "SIGNED" | "PENDING";
+  certificateType : CertificateType;
 }
-
+interface CertificateType{
+  id?: string;
+  name: string
+}
 export interface Student {
   id: string;
   name: string;

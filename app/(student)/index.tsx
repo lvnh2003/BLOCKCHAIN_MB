@@ -22,30 +22,29 @@ export default function StudentDashboard() {
       const mockCertificates: Certificate[] = [
         {
           id: '1',
-          name: 'Advanced UI/UX Design',
-          issueDate: '2024-03-10',
+          createdAt: '2024-03-10',
+          certificateType: { name: 'Advanced UI/UX Design' },
           imageUrl: 'https://images.unsplash.com/photo-1545235617-7a424c1a60cc?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
         },
         {
           id: '2',
-          name: 'Web Development Fundamentals',
-          issueDate: '2024-02-15',
+          createdAt: '2024-02-15',
+          certificateType: { name: 'Web Development Fundamentals' },
           imageUrl: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
         },
         {
           id: '3',
-          name: 'Mobile App Development',
-          issueDate: '2024-01-20',
+          createdAt: '2024-01-20',
+          certificateType: { name: 'Mobile App Development' },
           imageUrl: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
         },
         {
           id: '4',
-          name: 'Data Science Fundamentals',
-          issueDate: '2023-12-05',
+          createdAt: '2023-12-05',
+          certificateType: { name: 'Data Science Fundamentals' },
           imageUrl: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
         },
       ];
-      
       setCertificates(mockCertificates);
       setLoading(false);
     }, 1000);
@@ -53,7 +52,7 @@ export default function StudentDashboard() {
 
   // Filter certificates based on search query
   const filteredCertificates = certificates.filter(
-    cert => cert.name.toLowerCase().includes(searchQuery.toLowerCase())
+    cert => cert.certificateType.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   // Navigate to certificate detail
@@ -132,9 +131,9 @@ export default function StudentDashboard() {
                       <Image source={{ uri: certificate.imageUrl }} style={styles.certificateImage} />
                       <View style={styles.certificateInfo}>
                         <Text style={styles.certificateName} numberOfLines={1} ellipsizeMode="tail">
-                          {certificate.name}
+                          {certificate.certificateType.name}
                         </Text>
-                        <Text style={styles.issueDate}>Issued: {certificate.issueDate}</Text>
+                        <Text style={styles.issueDate}>Issued: {certificate.createdAt}</Text>
                       </View>
                     </View>
                   </Card.Content>

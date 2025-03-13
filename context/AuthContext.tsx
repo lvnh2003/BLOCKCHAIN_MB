@@ -1,7 +1,7 @@
 import React, { createContext, useState, useContext, ReactNode } from 'react';
 import { User } from '../types';
 import axios from 'axios';
-import api from '@/api';
+import api from '@/utils/api';
 import Toast from 'react-native-toast-message';
 interface AuthContextType {
   user: User | null;
@@ -22,7 +22,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   
       const userResponse = await api.get(`/users/code/${userData.code}`);
       setUser(userResponse.data);
-  
+      
+      
       return true; 
     } catch (error) {
       if (axios.isAxiosError(error)) {
