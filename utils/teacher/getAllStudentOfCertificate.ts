@@ -7,7 +7,6 @@ export const getAllStudentsOfCertificate = async (
 ): Promise<StudentOfCertificateResponse[]> => {
   try {
     const response = await api.get(`/certificate/studentByType/${certificateType?.id}`);
-    console.log(response.data);
     
     return response.data;
   } catch (error) {

@@ -241,7 +241,7 @@ export default function TeacherDashboard() {
               </View>
               <View style={styles.statsTextContainer}>
                 <Text style={[styles.statsNumber, styles.courseNumber]}>{certificatesData?.length || 0}</Text>
-                <Text style={styles.statsLabel}>Courses</Text>
+                <Text style={styles.statsLabel}>Certficates Total</Text>
               </View>
             </View>
           </LinearGradient>

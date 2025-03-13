@@ -1,8 +1,7 @@
 import { Camera, CameraView } from "expo-camera";
-import { Stack } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import {
   AppState,
-  Linking,
   Platform,
   SafeAreaView,
   StatusBar,
@@ -10,7 +9,10 @@ import {
   Dimensions,
 } from "react-native";
 import { Canvas, DiffRect, rect, rrect } from "@shopify/react-native-skia";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { signCertificate } from "@/utils/teacher/signCertificate";
+import Toast from "react-native-toast-message";
+import { useAuth } from "@/context/AuthContext";
 
 const { width, height } = Dimensions.get("window");
 
@@ -31,6 +33,9 @@ const inner = rrect(
 export default function Home() {
   const qrLock = useRef(false);
   const appState = useRef(AppState.currentState);
+  const { user } = useAuth();
+  const router = useRouter(); // Dùng để thoát màn hình
+  const [cameraActive, setCameraActive] = useState(true); // Trạng thái camera
 
   useEffect(() => {
     const subscription = AppState.addEventListener("change", (nextAppState) => {
@@ -48,36 +53,65 @@ export default function Home() {
     };
   }, []);
 
+  // Xử lý khi quét QR
+  const handleBarcodeScanned = async ({ data }: { data: string }) => {
+    if (data && !qrLock.current) {
+      qrLock.current = true;
+      try {
+        await signCertificate(user, data);
+        setCameraActive(false); // Ẩn camera sau khi ký thành công
+        Toast.show({
+          type: "success",
+          text1: "Certificate signed successfully!",
+        });
+
+        setTimeout(() => {
+          router.back(); // Thoát khỏi màn hình sau 1.5 giây
+        }, 1500);
+      } catch (error) {
+        Toast.show({
+          type: "error",
+          text1: "Signing failed!",
+        });
+        qrLock.current = false; // Mở khóa để thử lại nếu có lỗi
+      }
+    }
+  };
+
   return (
     <SafeAreaView style={StyleSheet.absoluteFillObject}>
       <Stack.Screen
         options={{
-          title: "Overview",
+          title: "QR Scanner",
           headerShown: false,
         }}
       />
-      {Platform.OS === "android" ? <StatusBar hidden /> : null}
-      <CameraView
-        style={StyleSheet.absoluteFillObject}
-        facing="back"
-        onBarcodeScanned={({ data }) => {
-          if (data && !qrLock.current) {
-            qrLock.current = true;
-            setTimeout(async () => {
-              await Linking.openURL(data);
-            }, 500);
+      {Platform.OS === "android" && <StatusBar hidden />}
+
+      {/* Hiển thị Camera nếu cameraActive */}
+      {cameraActive && (
+        <CameraView
+          style={StyleSheet.absoluteFillObject}
+          facing="back"
+          onBarcodeScanned={handleBarcodeScanned}
+        />
+      )}
+
+      {/* Hiển thị vùng quét QR */}
+      {cameraActive && (
+        <Canvas
+          style={
+            Platform.OS === "android"
+              ? { flex: 1 }
+              : StyleSheet.absoluteFillObject
           }
-        }}
-      />
-      <Canvas
-        style={
-          Platform.OS === "android"
-            ? { flex: 1 }
-            : StyleSheet.absoluteFillObject
-        }
-      >
-        <DiffRect inner={inner} outer={outer} color="black" opacity={0.5} />
-      </Canvas>
+        >
+          <DiffRect inner={inner} outer={outer} color="black" opacity={0.5} />
+        </Canvas>
+      )}
+
+      {/* Hiển thị Toast */}
+      <Toast />
     </SafeAreaView>
   );
 }
