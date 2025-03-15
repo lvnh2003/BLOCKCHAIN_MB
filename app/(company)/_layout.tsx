@@ -19,7 +19,7 @@ export default function CompanyLayout() {
       />
 
       <Tabs.Screen
-        name="profile"
+        name="profile/index"
         options={{
           headerShown: false,
           title: "Profile",

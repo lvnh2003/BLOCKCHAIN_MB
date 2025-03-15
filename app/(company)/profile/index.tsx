@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   StyleSheet,
   View,
@@ -7,158 +7,122 @@ import {
   TouchableOpacity,
   SafeAreaView,
   ScrollView,
+  Switch
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
+import { User } from "@/types";
+
+// Sample user data
+const userData: User = {
+  code: "USR12345",
+  password: "••••••••",
+  role: "TEACHER",
+  name: "Tools Lateef",
+  id: "TL-2023-001",
+  avatar: "https://img.tripi.vn/cdn-cgi/image/width=700,height=700/https://gcs.tripi.vn/public-tripi/tripi-feed/img/482740uFk/anh-mo-ta.png",
+  birthdate: "15/04/1990"
+};
 
 const ProfileScreen = () => {
+  const [showPassword, setShowPassword] = useState(false);
+  
+  // Get role color
+  const getRoleColor = (role?: string) => {
+    switch(role) {
+      case "STUDENT": return "#4CAF50";
+      case "TEACHER": return "#2196F3";
+      case "MASTER": return "#FF9800";
+      default: return "#757575";
+    }
+  };
+
+  // Format date for display
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return "Not specified";
+    return dateString;
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-        {/* Phần đầu (Header) */}
+        {/* Header Section */}
         <View style={styles.header}>
           <View style={styles.avatarContainer}>
             <Image
               source={{
-                uri: "https://img.tripi.vn/cdn-cgi/image/width=700,height=700/https://gcs.tripi.vn/public-tripi/tripi-feed/img/482740uFk/anh-mo-ta.png",
+                uri: userData.avatar || "https://via.placeholder.com/150"
               }}
               style={styles.avatar}
             />
-            <View>
-              <Text style={styles.name}>Tools Lateef</Text>
-            </View>
-          </View>
-          <View style={styles.infoContainer}>
-            <View style={styles.profession}>
-              <Text style={{ fontSize: 22 }}>Profession</Text>
-              <Text style={styles.texDesctiption}>UI/UX Designer</Text>
-            </View>
-            <View style={styles.contact}>
-              <Text style={{ fontSize: 22 }}>Contact</Text>
-              <Text style={styles.texDesctiption}>+84 123 456 789</Text>
-            </View>
-            <View style={styles.location}>
-              <Text style={{ fontSize: 22 }}>Location</Text>
-              <Text style={styles.texDesctiption}>
-                Ho Chi Minh City, Vietnam
-              </Text>
-            </View>
-            <View style={styles.position}>
-              <Text style={{ fontSize: 22 }}>Position</Text>
-              <Text style={styles.texDesctiption}>Senior Designer</Text>
+            <View style={styles.nameContainer}>
+              <Text style={styles.name}>{userData.name || "User Name"}</Text>
+              <View style={[styles.roleBadge, { backgroundColor: getRoleColor(userData.role) }]}>
+                <Text style={styles.roleText}>{userData.role || "ROLE"}</Text>
+              </View>
             </View>
           </View>
         </View>
 
-        {/* Phần thứ hai (Jobs Done) */}
-        <View style={styles.jobsDone}>
-          <Text style={styles.sectionTitle}>Jobs Done</Text>
-          <View style={styles.cardContainer}>
-            <View style={styles.card}>
-              <Text style={styles.cardTitle}>Product Design</Text>
+        {/* User Information Section */}
+        <View style={styles.infoSection}>
+          <Text style={styles.sectionTitle}>User Information</Text>
+          
+          <View style={styles.infoCard}>
+            <View style={styles.infoItem}>
+              <MaterialCommunityIcons name="identifier" size={24} color="#EF4637" />
+              <View style={styles.infoContent}>
+                <Text style={styles.infoLabel}>User ID</Text>
+                <Text style={styles.infoValue}>{userData.id || "Not specified"}</Text>
+              </View>
             </View>
-            <View style={styles.card}>
-              <Text style={styles.cardTitle}>Front end</Text>
+            
+            <View style={styles.infoItem}>
+              <MaterialCommunityIcons name="barcode" size={24} color="#EF4637" />
+              <View style={styles.infoContent}>
+                <Text style={styles.infoLabel}>Code</Text>
+                <Text style={styles.infoValue}>{userData.code}</Text>
+              </View>
             </View>
-            <View style={styles.card}>
-              <Text style={styles.cardTitle}>Visual Designer</Text>
+            
+            <View style={styles.infoItem}>
+              <MaterialCommunityIcons name="lock" size={24} color="#EF4637" />
+              <View style={styles.infoContent}>
+                <Text style={styles.infoLabel}>Password</Text>
+                <View style={styles.passwordContainer}>
+                  <Text style={styles.infoValue}>
+                    {showPassword ? userData.password : "••••••••"}
+                  </Text>
+                  <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                    <MaterialCommunityIcons 
+                      name={showPassword ? "eye-off" : "eye"} 
+                      size={20} 
+                      color="#757575" 
+                    />
+                  </TouchableOpacity>
+                </View>
+              </View>
             </View>
-            <View style={styles.card}>
-              <Text style={styles.cardTitle}>Voyager</Text>
+            
+            <View style={styles.infoItem}>
+              <MaterialCommunityIcons name="cake-variant" size={24} color="#EF4637" />
+              <View style={styles.infoContent}>
+                <Text style={styles.infoLabel}>Birthdate</Text>
+                <Text style={styles.infoValue}>{formatDate(userData.birthdate)}</Text>
+              </View>
+            </View>
+            
+            <View style={styles.infoItem}>
+              <MaterialCommunityIcons name="account-tie" size={24} color="#EF4637" />
+              <View style={styles.infoContent}>
+                <Text style={styles.infoLabel}>Role</Text>
+                <Text style={[styles.infoValue, { color: getRoleColor(userData.role) }]}>
+                  {userData.role || "Not specified"}
+                </Text>
+              </View>
             </View>
           </View>
         </View>
-
-        {/* Phần cuối (Footer) */}
-        <LinearGradient
-          colors={["#6a11cb", "#2575fc"]} // Màu gradient
-          style={styles.footer}
-        >
-          {/* Progress Bars */}
-          <SafeAreaView style={styles.footerContainer}>
-            <View style={styles.progressContainer}>
-              <Text style={styles.progressTitle}>Skills</Text>
-              <View style={styles.progressItem}>
-                <Text style={styles.progressLabel}>UI/UX Design</Text>
-                <View style={styles.progressBar}>
-                  <View
-                    style={[
-                      styles.progressFill,
-                      { width: "80%", backgroundColor: "#FFD700" },
-                    ]}
-                  />
-                </View>
-              </View>
-              <View style={styles.progressItem}>
-                <Text style={styles.progressLabel}>Frontend Development</Text>
-                <View style={styles.progressBar}>
-                  <View
-                    style={[
-                      styles.progressFill,
-                      { width: "60%", backgroundColor: "#32CD32" },
-                    ]}
-                  />
-                </View>
-              </View>
-              <View style={styles.progressItem}>
-                <Text style={styles.progressLabel}>Communication</Text>
-                <View style={styles.progressBar}>
-                  <View
-                    style={[
-                      styles.progressFill,
-                      { width: "90%", backgroundColor: "#1E90FF" },
-                    ]}
-                  />
-                </View>
-              </View>
-            </View>
-
-            {/* Call-to-Action Buttons */}
-            <View style={styles.buttonContainer}>
-              <TouchableOpacity
-                style={[styles.button, { backgroundColor: "#FF4757" }]}
-              >
-                <Text style={styles.buttonText}>Hire Me</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.button, { backgroundColor: "#2ED573" }]}
-              >
-                <Text style={styles.buttonText}>View Portfolio</Text>
-              </TouchableOpacity>
-            </View>
-
-            {/* Stats with Icons */}
-            <View style={styles.statsContainer}>
-              <View style={styles.statItem}>
-                <MaterialCommunityIcons
-                  name="trophy"
-                  size={24}
-                  color="#FFD700"
-                />
-                <Text style={styles.statNumber}>15</Text>
-                <Text style={styles.statText}>Awards</Text>
-              </View>
-              <View style={styles.statItem}>
-                <MaterialCommunityIcons
-                  name="calendar-check"
-                  size={24}
-                  color="#32CD32"
-                />
-                <Text style={styles.statNumber}>37</Text>
-                <Text style={styles.statText}>Projects</Text>
-              </View>
-              <View style={styles.statItem}>
-                <MaterialCommunityIcons
-                  name="heart"
-                  size={24}
-                  color="#FF6B81"
-                />
-                <Text style={styles.statNumber}>99%</Text>
-                <Text style={styles.statText}>Satisfaction</Text>
-              </View>
-            </View>
-          </SafeAreaView>
-        </LinearGradient>
       </ScrollView>
     </SafeAreaView>
   );
@@ -167,100 +131,95 @@ const ProfileScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#ffffff",
+    backgroundColor: "#f5f5f5",
   },
   header: {
-    flexDirection: "row",
-    marginBottom: 20,
-    height: 300,
-    padding: 0,
-  },
-  texDesctiption: {
-    fontSize: 14,
-    color: "#EF4637",
-  },
-  avatarContainer: {
-    marginRight: 16,
+    padding: 20,
     backgroundColor: "#FDEDEB",
-    width: "50%",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  avatar: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-  },
-  infoContainer: {
-    flex: 1,
-    justifyContent: "center",
-  },
-  name: {
-    fontSize: 24,
-    fontWeight: "bold",
-  },
-  profession: {
-    fontSize: 18,
-    color: "gray",
-    marginTop: 4,
-    display: "flex",
-  },
-  contact: {
-    fontSize: 18,
-    color: "gray",
-    marginTop: 4,
-    display: "flex",
-  },
-  location: {
-    fontSize: 18,
-    color: "gray",
-    marginTop: 4,
-    display: "flex",
-  },
-  position: {
-    fontSize: 18,
-    color: "gray",
-    marginTop: 4,
-    display: "flex",
-  },
-  jobsDone: {
-    marginBottom: 20,
-    padding: 16,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 10,
-    textAlign: "center",
-  },
-  cardContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-around",
-    alignItems: "center",
-    gap: 16,
-  },
-  card: {
-    width: 152,
-    backgroundColor: "#fff",
-    height: 100,
-    padding: 16,
-    borderRadius: 8,
-    marginBottom: 10,
-    alignItems: "center",
-    justifyContent: "center",
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 2,
-    color: "#EF4637",
+    elevation: 3,
   },
-  cardTitle: {
-    fontSize: 16,
+  avatarContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  avatar: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    borderWidth: 3,
+    borderColor: "#fff",
+  },
+  nameContainer: {
+    alignItems: "center",
+    marginTop: 10,
+  },
+  name: {
+    fontSize: 24,
     fontWeight: "bold",
-    color: "#EF4637",
+    color: "#333",
+  },
+  roleBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 20,
+    marginTop: 8,
+  },
+  roleText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 14,
+  },
+  infoSection: {
+    padding: 20,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 15,
+    color: "#333",
+  },
+  infoCard: {
+    backgroundColor: "#fff",
+    borderRadius: 15,
+    padding: 15,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  infoItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f0f0f0",
+  },
+  infoContent: {
+    marginLeft: 15,
+    flex: 1,
+  },
+  infoLabel: {
+    fontSize: 14,
+    color: "#757575",
+  },
+  infoValue: {
+    fontSize: 16,
+    fontWeight: "500",
+    color: "#333",
+    marginTop: 2,
+  },
+  passwordContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginTop: 2,
   },
   footer: {
     padding: 20,
@@ -272,13 +231,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 6,
     elevation: 6,
-    flex: 1,
-    display: "flex",
   },
   footerContainer: {
     padding: 16,
-    flex: 1,
-    height: "100%",
   },
   progressContainer: {
     marginBottom: 20,
@@ -287,10 +242,10 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     color: "#FFF",
-    marginBottom: 10,
+    marginBottom: 15,
   },
   progressItem: {
-    marginBottom: 10,
+    marginBottom: 12,
   },
   progressLabel: {
     fontSize: 14,
@@ -299,7 +254,7 @@ const styles = StyleSheet.create({
   },
   progressBar: {
     height: 10,
-    backgroundColor: "#FFF",
+    backgroundColor: "rgba(255, 255, 255, 0.3)",
     borderRadius: 5,
     overflow: "hidden",
   },
@@ -326,7 +281,7 @@ const styles = StyleSheet.create({
   },
   statsContainer: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "space-around",
   },
   statItem: {
     alignItems: "center",

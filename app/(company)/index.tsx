@@ -1,1091 +1,999 @@
-import React from "react";
-
-import { useEffect, useState, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import {
-  View,
   StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  Image,
-  Dimensions,
-  ImageBackground,
-  Animated,
-  Platform,
-  RefreshControl,
-  FlatList,
-} from "react-native";
-import {
+  View,
   Text,
-  Avatar,
-  Searchbar,
-  ActivityIndicator,
-  Surface,
-  IconButton,
-  Divider,
-} from "react-native-paper";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
-import { useAuth } from "../../context/AuthContext";
-import { StatusBar } from "expo-status-bar";
+  Image,
+  TouchableOpacity,
+  SafeAreaView,
+  ScrollView,
+  TextInput,
+  FlatList,
+  StatusBar,
+  Dimensions,
+  Modal,
+  Platform
+} from "react-native";
+import { MaterialCommunityIcons, Ionicons, Feather, AntDesign } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { BlurView } from "expo-blur";
-import {
-  MaterialCommunityIcons,
-  MaterialIcons,
-  Feather,
-  AntDesign,
-} from "@expo/vector-icons";
-import { PieChart } from "react-native-chart-kit";
+import { Certificate, Student } from "@/types";
 
-const { width, height } = Dimensions.get("window");
-const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView);
-
-// Mock data for admin dashboard
-const mockData = {
-  students: {
-    total: 1248,
-    active: 1052,
-    newThisMonth: 87,
-    growthRate: 12.4,
+// Sample data for certificates with students
+const certificatesData = [
+  { 
+    id: '1', 
+    name: 'Web Development', 
+    issuer: 'Tech Academy',
+    date: 'June 2023',
+    icon: 'https://via.placeholder.com/60',
+    color: '#4CAF50',
+    students: [
+      { 
+        id: '101', 
+        name: 'John Doe', 
+        avatar: 'https://via.placeholder.com/50', 
+        achievementDate: '15 Jan 2023',
+        score: '95/100',
+        email: 'john.doe@example.com',
+        role: 'STUDENT'
+      },
+      { 
+        id: '102', 
+        name: 'Jane Smith', 
+        avatar: 'https://via.placeholder.com/50', 
+        achievementDate: '20 Feb 2023',
+        score: '92/100',
+        email: 'jane.smith@example.com',
+        role: 'STUDENT'
+      },
+      { 
+        id: '103', 
+        name: 'Mike Johnson', 
+        avatar: 'https://via.placeholder.com/50', 
+        achievementDate: '5 Mar 2023',
+        score: '88/100',
+        email: 'mike.johnson@example.com',
+        role: 'STUDENT'
+      },
+      { 
+        id: '104', 
+        name: 'Sarah Williams', 
+        avatar: 'https://via.placeholder.com/50', 
+        achievementDate: '12 Apr 2023',
+        score: '97/100',
+        email: 'sarah.williams@example.com',
+        role: 'STUDENT'
+      },
+    ],
+    category: 'Programming'
   },
-  teachers: {
-    total: 64,
-    active: 58,
-    newThisMonth: 5,
-    growthRate: 8.2,
+  { 
+    id: '2', 
+    name: 'Data Science', 
+    issuer: 'Data Institute',
+    date: 'August 2023',
+    icon: 'https://via.placeholder.com/60',
+    color: '#2196F3',
+    students: [
+      { 
+        id: '201', 
+        name: 'Robert Brown', 
+        avatar: 'https://via.placeholder.com/50', 
+        achievementDate: '10 May 2023',
+        score: '91/100',
+        email: 'robert.brown@example.com',
+        role: 'STUDENT'
+      },
+      { 
+        id: '202', 
+        name: 'Emily Davis', 
+        avatar: 'https://via.placeholder.com/50', 
+        achievementDate: '15 Jun 2023',
+        score: '89/100',
+        email: 'emily.davis@example.com',
+        role: 'STUDENT'
+      },
+    ],
+    category: 'Data'
   },
-  companies: {
-    total: 32,
-    active: 28,
-    newThisMonth: 3,
-    growthRate: 10.5,
+  { 
+    id: '3', 
+    name: 'Mobile App Development', 
+    issuer: 'App Academy',
+    date: 'July 2023',
+    icon: 'https://via.placeholder.com/60',
+    color: '#FF9800',
+    students: [
+      { 
+        id: '301', 
+        name: 'David Wilson', 
+        avatar: 'https://via.placeholder.com/50', 
+        achievementDate: '20 Jul 2023',
+        score: '94/100',
+        email: 'david.wilson@example.com',
+        role: 'STUDENT'
+      },
+      { 
+        id: '302', 
+        name: 'Lisa Martinez', 
+        avatar: 'https://via.placeholder.com/50', 
+        achievementDate: '25 Aug 2023',
+        score: '90/100',
+        email: 'lisa.martinez@example.com',
+        role: 'STUDENT'
+      },
+      { 
+        id: '303', 
+        name: 'James Taylor', 
+        avatar: 'https://via.placeholder.com/50', 
+        achievementDate: '30 Sep 2023',
+        score: '86/100',
+        email: 'james.taylor@example.com',
+        role: 'STUDENT'
+      },
+    ],
+    category: 'Programming'
   },
-  certificates: {
-    total: 876,
-    signed: 742,
-    pending: 134,
+  { 
+    id: '4', 
+    name: 'UI/UX Design', 
+    issuer: 'Design School',
+    date: 'September 2023',
+    icon: 'https://via.placeholder.com/60',
+    color: '#E91E63',
+    students: [
+      { 
+        id: '401', 
+        name: 'Patricia Anderson', 
+        avatar: 'https://via.placeholder.com/50', 
+        achievementDate: '5 Oct 2023',
+        score: '98/100',
+        email: 'patricia.anderson@example.com',
+        role: 'STUDENT'
+      },
+      { 
+        id: '402', 
+        name: 'Thomas Jackson', 
+        avatar: 'https://via.placeholder.com/50', 
+        achievementDate: '10 Nov 2023',
+        score: '93/100',
+        email: 'thomas.jackson@example.com',
+        role: 'STUDENT'
+      },
+    ],
+    category: 'Design'
   },
-  monthlyStats: {
-    labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
-    students: [30, 45, 28, 80, 99, 43],
-    teachers: [5, 8, 12, 15, 20, 25],
-    certificates: [20, 35, 40, 55, 82, 120],
+  { 
+    id: '5', 
+    name: 'Cloud Computing', 
+    issuer: 'Cloud Institute',
+    date: 'May 2023',
+    icon: 'https://via.placeholder.com/60',
+    color: '#673AB7',
+    students: [
+      { 
+        id: '501', 
+        name: 'Jennifer White', 
+        avatar: 'https://via.placeholder.com/50', 
+        achievementDate: '15 Dec 2023',
+        score: '87/100',
+        email: 'jennifer.white@example.com',
+        role: 'STUDENT'
+      },
+      { 
+        id: '502', 
+        name: 'Michael Brown', 
+        avatar: 'https://via.placeholder.com/50', 
+        achievementDate: '20 Jan 2024',
+        score: '92/100',
+        email: 'michael.brown@example.com',
+        role: 'STUDENT'
+      },
+    ],
+    category: 'Infrastructure'
   },
-  searchItems: [
-    { id: 1, type: "student", name: "John Doe", email: "john@example.com" },
-    { id: 2, type: "teacher", name: "Jane Smith", email: "jane@example.com" },
-    { id: 3, type: "company", name: "Tech Corp", email: "tech@example.com" },
-    { id: 4, type: "certificate", name: "Certificate #123", email: "" },
-  ],
-};
+  { 
+    id: '6', 
+    name: 'Digital Marketing', 
+    issuer: 'Marketing Academy',
+    date: 'October 2023',
+    icon: 'https://via.placeholder.com/60',
+    color: '#009688',
+    students: [
+      { 
+        id: '601', 
+        name: 'Elizabeth Lee', 
+        avatar: 'https://via.placeholder.com/50', 
+        achievementDate: '25 Feb 2024',
+        score: '96/100',
+        email: 'elizabeth.lee@example.com',
+        role: 'STUDENT'
+      },
+      { 
+        id: '602', 
+        name: 'William Garcia', 
+        avatar: 'https://via.placeholder.com/50', 
+        achievementDate: '1 Mar 2024',
+        score: '89/100',
+        email: 'william.garcia@example.com',
+        role: 'STUDENT'
+      },
+      { 
+        id: '603', 
+        name: 'Olivia Miller', 
+        avatar: 'https://via.placeholder.com/50', 
+        achievementDate: '5 Apr 2024',
+        score: '91/100',
+        email: 'olivia.miller@example.com',
+        role: 'STUDENT'
+      },
+    ],
+    category: 'Marketing'
+  },
+];
 
-export default function AdminDashboard() {
-  const { user, logout } = useAuth();
-  const router = useRouter();
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [showSearchBar, setShowSearchBar] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState([]);
-  const scrollY = useRef(new Animated.Value(0)).current;
 
-  // Animation values
-  const headerHeight = scrollY.interpolate({
-    inputRange: [0, 100],
-    outputRange: [200, 120],
-    extrapolate: "clamp",
-  });
+const { width } = Dimensions.get('window');
 
-  const headerOpacity = scrollY.interpolate({
-    inputRange: [0, 60, 90],
-    outputRange: [1, 0.3, 0],
-    extrapolate: "clamp",
-  });
-
-  const headerTitleOpacity = scrollY.interpolate({
-    inputRange: [0, 60, 90],
-    outputRange: [0, 0.5, 1],
-    extrapolate: "clamp",
-  });
+const EmployerHomePage = () => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filteredCertificates, setFilteredCertificates] = useState(certificatesData);
+  
+  // State for student list modal
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedCertificate, setSelectedCertificate] = useState<Certificate>();
+  const [studentSearchQuery, setStudentSearchQuery] = useState('');
+  const [filteredStudents, setFilteredStudents] = useState([]);
 
   useEffect(() => {
-    // Simulate data loading
-    const timer = setTimeout(() => {
-      setLoading(false);
-      setRefreshing(false);
-    }, 1500);
-    return () => clearTimeout(timer);
-  }, [refreshing]);
-
-  const onRefresh = () => {
-    setRefreshing(true);
-  };
-
-  // Toggle search bar
-  const toggleSearchBar = () => {
-    setShowSearchBar(!showSearchBar);
-    setSearchQuery("");
-    setSearchResults([]);
-  };
-
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
-    if (query) {
-      const filteredResults = mockData.searchItems.filter((item) =>
-        item.name.toLowerCase().includes(query.toLowerCase())
+    let filtered = certificatesData;
+    
+    if (searchQuery) {
+      filtered = filtered.filter(cert => 
+        cert.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        cert.issuer.toLowerCase().includes(searchQuery.toLowerCase())
       );
-      setSearchResults(filteredResults as any);
-    } else {
-      setSearchResults([]);
     }
+    
+    
+    setFilteredCertificates(filtered);
+  }, [searchQuery]);
+
+  // Filter students when search query changes or certificate is selected
+  useEffect(() => {
+    if (!selectedCertificate) return;
+    
+    let students = selectedCertificate.students;
+    
+    if (studentSearchQuery) {
+      students = students.filter(student => 
+        student.name.toLowerCase().includes(studentSearchQuery.toLowerCase()) ||
+        student.email.toLowerCase().includes(studentSearchQuery.toLowerCase())
+      );
+    }
+    
+    setFilteredStudents(students);
+  }, [studentSearchQuery, selectedCertificate]);
+
+  // Handle certificate selection
+  const handleCertificatePress = (certificate: Certificate) => {
+    setSelectedCertificate(certificate);
+    setFilteredStudents(certificate.students);
+    setStudentSearchQuery('');
+    setModalVisible(true);
   };
 
-  // Render search result item
-  const renderSearchItem = ({ item }: any) => (
-    <TouchableOpacity style={styles.searchItem}>
-      <View style={styles.searchItemIcon}>{getActivityIcon(item.type)}</View>
-      <View style={styles.searchItemText}>
-        <Text style={styles.searchItemName}>{item.name}</Text>
-        {item.email && <Text style={styles.searchItemEmail}>{item.email}</Text>}
+  // Render certificate item
+  const renderCertificateItem = ({ item }) => (
+    <TouchableOpacity 
+      style={styles.certificateCard}
+      onPress={() => handleCertificatePress(item)}
+    >
+      <LinearGradient
+        colors={['#ffffff', '#f8f9fa']}
+        style={styles.cardGradient}
+      >
+        <View style={styles.certificateHeader}>
+          <View style={[styles.iconContainer, { backgroundColor: item.color + '20' }]}>
+            <MaterialCommunityIcons name="certificate" size={28} color={item.color} />
+          </View>
+          <View style={styles.certificateInfo}>
+            <Text style={styles.certificateName}>{item.name}</Text>
+            <Text style={styles.certificateIssuer}>{item.issuer}</Text>
+            <Text style={styles.certificateDate}>{item.date}</Text>
+          </View>
+        </View>
+        
+        <View style={styles.certificateFooter}>
+          <View style={styles.categoryBadge}>
+            <Text style={styles.categoryText}>{item.category}</Text>
+          </View>
+          <View style={styles.studentsContainer}>
+            <MaterialCommunityIcons name="account-group" size={18} color="#6c757d" />
+            <Text style={styles.studentsCount}>{item.students.length} Students</Text>
+          </View>
+        </View>
+      </LinearGradient>
+    </TouchableOpacity>
+  );
+
+  // Render student item
+  const renderStudentItem = ({ item }:{item: Student}) => (
+    <TouchableOpacity 
+      style={styles.studentCard}
+      onPress={() => {
+        // Navigate to student profile or show more details
+        setModalVisible(false);
+        // navigation?.navigate('StudentProfile', { student: item });
+      }}
+    >
+      <Image source={{ uri: item.avatar }} style={styles.studentAvatar} />
+      
+      <View style={styles.studentInfo}>
+        <Text style={styles.studentName}>{item.name}</Text>
+        <Text style={styles.studentEmail}>{item.email}</Text>
+        <View style={styles.studentDetails}>
+          <View style={styles.detailItem}>
+            <MaterialCommunityIcons name="calendar" size={14} color="#6c757d" />
+            <Text style={styles.detailText}>{item.achievementDate}</Text>
+          </View>
+          <View style={styles.detailItem}>
+            <MaterialCommunityIcons name="star" size={14} color="#FFD700" />
+            <Text style={styles.detailText}>{item.score}</Text>
+          </View>
+        </View>
+      </View>
+      
+      <View style={styles.studentActions}>
+        <TouchableOpacity style={styles.actionButton}>
+          <Feather name="mail" size={18} color="#2196F3" />
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.actionButton}>
+          <Feather name="user-plus" size={18} color="#4CAF50" />
+        </TouchableOpacity>
       </View>
     </TouchableOpacity>
   );
 
-  const getActivityIcon = (type: any) => {
-    switch (type) {
-      case "student":
-        return <MaterialIcons name="person" size={24} color="#1976D2" />;
-      case "teacher":
-        return <MaterialIcons name="school" size={24} color="#4CAF50" />;
-      case "certificate":
-        return (
-          <MaterialCommunityIcons
-            name="certificate"
-            size={24}
-            color="#FF9800"
-          />
-        );
-      case "company":
-        return <MaterialIcons name="business" size={24} color="#9C27B0" />;
-      default:
-        return <MaterialIcons name="info" size={24} color="#1976D2" />;
-    }
-  };
-
-  if (loading && !refreshing) {
-    return (
-      <SafeAreaView style={styles.loadingContainer}>
-        <Image
-          source={{
-            uri: "https://cdn-icons-png.flaticon.com/512/6295/6295417.png",
-          }}
-          style={styles.loadingImage}
-        />
-        <ActivityIndicator
-          size="large"
-          color="#1976D2"
-          style={styles.loadingIndicator}
-        />
-        <Text style={styles.loadingText}>Loading dashboard data...</Text>
-      </SafeAreaView>
-    );
-  }
 
   return (
-    <SafeAreaView style={styles.container} edges={["top"]}>
-      <StatusBar style="light" />
-
-      {/* Animated Header */}
-      <Animated.View style={[styles.headerContainer, { height: headerHeight }]}>
-        <ImageBackground
-          source={{
-            uri: "https://images.unsplash.com/photo-1557683316-973673baf926?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
-          }}
-          style={styles.headerBackground}
-          imageStyle={styles.headerBackgroundImage}
-        >
-          <LinearGradient
-            colors={["rgba(55, 71, 133, 0.8)", "rgba(35, 45, 90, 0.95)"]}
-            style={styles.headerGradient}
-          >
-            {/* Compact Header Title (visible on scroll) */}
-            <Animated.View
-              style={[styles.compactHeader, { opacity: headerTitleOpacity }]}
-            >
-              <Text style={styles.compactHeaderTitle}>Admin Dashboard</Text>
-              <View style={styles.compactHeaderActions}>
-                <IconButton
-                  icon="magnify"
-                  iconColor="#fff"
-                  size={24}
-                  onPress={toggleSearchBar}
-                  style={styles.headerActionButton}
-                />
-                <IconButton
-                  icon="logout"
-                  iconColor="#fff"
-                  size={24}
-                  onPress={() => router.replace("/login")}
-                  style={styles.headerActionButton}
-                />
-              </View>
-            </Animated.View>
-
-            {/* Full Header Content (fades on scroll) */}
-            <Animated.View
-              style={[styles.headerContent, { opacity: headerOpacity }]}
-            >
-              <View style={styles.headerTop}>
-                <View>
-                  <Text style={styles.welcomeText}>Welcome back,</Text>
-                  <Text style={styles.userName}>{user?.name || "Admin"}</Text>
-                  <Text style={styles.userRole}>System Administrator</Text>
-                </View>
-                <View style={styles.headerActions}>
-                  <TouchableOpacity
-                    style={styles.headerActionButton}
-                    onPress={toggleSearchBar}
-                  >
-                    <Feather name="search" size={22} color="#fff" />
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={styles.headerActionButton}
-                    onPress={() => router.replace("/login")}
-                  >
-                    <Feather name="log-out" size={22} color="#fff" />
-                  </TouchableOpacity>
-                  <Avatar.Image
-                    size={50}
-                    source={{ uri: "https://i.pravatar.cc/300?img=68" }}
-                    style={styles.avatar}
-                  />
-                </View>
-              </View>
-            </Animated.View>
-          </LinearGradient>
-        </ImageBackground>
-      </Animated.View>
-
-      {/* Search Bar (Conditional) */}
-      {showSearchBar && (
-        <View style={styles.searchBarContainer} pointerEvents="box-none">
-          {/* <BlurView
-            intensity={80}
-            tint="light"
-            style={styles.searchBarBlur}
-            pointerEvents="none"
-          > */}
-          <Searchbar
-            placeholder="Search dashboard..."
-            onChangeText={handleSearch}
-            value={searchQuery}
-            style={styles.searchBar}
-            iconColor="#374785"
-            inputStyle={{ color: "#333" }}
-            placeholderTextColor="#888"
-            onIconPress={toggleSearchBar}
-            icon="arrow-left"
-          />
-          {/* </BlurView> */}
-
-          {/* Search Results */}
-          {searchResults.length > 0 && (
-            <View style={styles.searchResultsContainer}>
-              <FlatList
-                data={searchResults}
-                renderItem={renderSearchItem}
-                keyExtractor={(item: any) => item.id.toString()}
-                style={styles.searchResultsList}
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
+      
+      {/* Header */}
+      <View style={styles.header}>
+        <View style={styles.headerTop}>
+          <View style={styles.logoContainer}>
+            <Image 
+              source={{ uri: 'https://via.placeholder.com/40' }} 
+              style={styles.logo} 
+            />
+            <Text style={styles.companyName}>TalentHub</Text>
+          </View>
+          
+          <View style={styles.headerActions}>
+            <TouchableOpacity style={styles.profileButton}>
+              <Image 
+                source={{ uri: 'https://via.placeholder.com/30' }} 
+                style={styles.profileImage} 
               />
-            </View>
+            </TouchableOpacity>
+          </View>
+        </View>
+        
+        <View style={styles.welcomeSection}>
+          <Text style={styles.welcomeText}>Welcome back,</Text>
+          <Text style={styles.employerName}>Employer Inc.</Text>
+        </View>
+      </View>
+      
+      {/* Search Bar */}
+      <View style={styles.searchContainer}>
+        <View style={styles.searchBar}>
+          <Feather name="search" size={20} color="#6c757d" style={styles.searchIcon} />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search certificates or issuers..."
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            placeholderTextColor="#6c757d"
+          />
+          {searchQuery.length > 0 && (
+            <TouchableOpacity onPress={() => setSearchQuery('')}>
+              <Feather name="x" size={20} color="#6c757d" />
+            </TouchableOpacity>
           )}
         </View>
-      )}
-
-      <AnimatedScrollView
-        style={styles.content}
-        contentContainerStyle={styles.contentContainer}
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            colors={["#374785"]}
-          />
-        }
-        scrollEventThrottle={16}
-        onScroll={Animated.event(
-          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-          {
-            useNativeDriver: false,
-          }
-        )}
-      >
-        {/* Main Stats Cards */}
-        <View style={styles.statsGrid}>
-          {/* Students Card */}
-          <Surface style={styles.simpleStatsCard}>
-            <View style={styles.simpleStatsContent}>
-              <View
-                style={[styles.simpleStatsIcon, { backgroundColor: "#1976D2" }]}
-              >
-                <MaterialIcons name="people" size={28} color="#fff" />
-              </View>
-              <View style={styles.simpleStatsTextContainer}>
-                <Text style={styles.simpleStatsNumber}>
-                  {mockData.students.total.toLocaleString()}
-                </Text>
-                <Text style={styles.simpleStatsTitle}>Students</Text>
-              </View>
-            </View>
-          </Surface>
-
-          {/* Teachers Card */}
-          <Surface style={styles.simpleStatsCard}>
-            <View style={styles.simpleStatsContent}>
-              <View
-                style={[styles.simpleStatsIcon, { backgroundColor: "#4CAF50" }]}
-              >
-                <MaterialIcons name="school" size={28} color="#fff" />
-              </View>
-              <View style={styles.simpleStatsTextContainer}>
-                <Text style={styles.simpleStatsNumber}>
-                  {mockData.teachers.total.toLocaleString()}
-                </Text>
-                <Text style={styles.simpleStatsTitle}>Teachers</Text>
-              </View>
-            </View>
-          </Surface>
-
-          {/* Companies Card */}
-          <Surface style={styles.simpleStatsCard}>
-            <View style={styles.simpleStatsContent}>
-              <View
-                style={[styles.simpleStatsIcon, { backgroundColor: "#9C27B0" }]}
-              >
-                <MaterialIcons name="business" size={28} color="#fff" />
-              </View>
-              <View style={styles.simpleStatsTextContainer}>
-                <Text style={styles.simpleStatsNumber}>
-                  {mockData.companies.total.toLocaleString()}
-                </Text>
-                <Text style={styles.simpleStatsTitle}>Companies</Text>
-              </View>
-            </View>
-          </Surface>
-
-          {/* Certificates Card */}
-          <Surface style={styles.simpleStatsCard}>
-            <View style={styles.simpleStatsContent}>
-              <View
-                style={[styles.simpleStatsIcon, { backgroundColor: "#FF9800" }]}
-              >
-                <MaterialCommunityIcons
-                  name="certificate"
-                  size={28}
-                  color="#fff"
-                />
-              </View>
-              <View style={styles.simpleStatsTextContainer}>
-                <Text style={styles.simpleStatsNumber}>
-                  {mockData.certificates.total.toLocaleString()}
-                </Text>
-                <Text style={styles.simpleStatsTitle}>Certificates</Text>
-              </View>
-            </View>
-          </Surface>
+      </View>
+      
+      {/* Main Content */}
+      <View style={styles.contentContainer}>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Available Certificates</Text>
+          <TouchableOpacity>
+            <Text style={styles.seeAllText}>See All</Text>
+          </TouchableOpacity>
         </View>
-
-        {/* Certificate Status Chart */}
-        <View style={styles.chartsSection}>
-          <View style={styles.sectionHeader}>
-            <View style={styles.sectionTitleContainer}>
-              <MaterialIcons
-                name="insert-chart"
-                size={22}
-                color="#374785"
-                style={styles.sectionIcon}
+        
+        {filteredCertificates.length > 0 ? (
+          <FlatList
+            data={filteredCertificates}
+            renderItem={renderCertificateItem}
+            keyExtractor={item => item.id}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.certificatesList}
+          />
+        ) : (
+          <View style={styles.emptyState}>
+            <MaterialCommunityIcons name="certificate-outline" size={60} color="#d1d1d1" />
+            <Text style={styles.emptyStateText}>No certificates found</Text>
+            <Text style={styles.emptyStateSubtext}>Try adjusting your search or filters</Text>
+          </View>
+        )}
+      </View>
+    
+      
+      {/* Students List Modal */}
+      <Modal
+        animationType="slide"
+        transparent={false}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <SafeAreaView style={styles.modalContainer}>
+          {/* Modal Header */}
+          <View style={styles.modalHeader}>
+            <TouchableOpacity 
+              style={styles.backButton}
+              onPress={() => setModalVisible(false)}
+            >
+              <AntDesign name="arrowleft" size={24} color="#333" />
+            </TouchableOpacity>
+            
+            {selectedCertificate && (
+              <View style={styles.modalTitleContainer}>
+                <Text style={styles.modalTitle}>{selectedCertificate.certificateType?.name}</Text>
+              </View>
+            )}
+            
+            <TouchableOpacity style={styles.modalActionButton}>
+              <MaterialCommunityIcons name="export-variant" size={24} color="#333" />
+            </TouchableOpacity>
+          </View>
+          
+          {/* Certificate Details */}
+          {selectedCertificate && (
+            <View style={styles.certificateDetailCard}>
+              <View style={[styles.certificateIconLarge, { backgroundColor: selectedCertificate.color + '20' }]}>
+                <MaterialCommunityIcons name="certificate" size={40} color={selectedCertificate.color} />
+              </View>
+              
+              <View style={styles.certificateDetailInfo}>
+                <Text style={styles.certificateDetailName}>{selectedCertificate.certificateType?.name}</Text>
+                <Text style={styles.certificateDetailDate}>Created at: {selectedCertificate.createdAt}</Text>
+                
+                <View style={styles.certificateStats}>
+                  <View style={styles.statBadge}>
+                    <MaterialCommunityIcons name="account-group" size={16} color="#6c757d" />
+                    <Text style={styles.statText}>{selectedCertificate.students.length} Students</Text>
+                  </View>
+                </View>
+              </View>
+            </View>
+          )}
+          
+          {/* Student Search */}
+          <View style={styles.studentSearchContainer}>
+            <View style={styles.studentSearchBar}>
+              <Feather name="search" size={20} color="#6c757d" style={styles.searchIcon} />
+              <TextInput
+                style={styles.searchInput}
+                placeholder="Search students by name or email..."
+                value={studentSearchQuery}
+                onChangeText={setStudentSearchQuery}
+                placeholderTextColor="#6c757d"
               />
-              <Text style={styles.sectionTitle}>Certificate Status</Text>
+              {studentSearchQuery.length > 0 && (
+                <TouchableOpacity onPress={() => setStudentSearchQuery('')}>
+                  <Feather name="x" size={20} color="#6c757d" />
+                </TouchableOpacity>
+              )}
             </View>
           </View>
-
-          <Surface style={styles.chartCard}>
-            <View style={styles.chartCardHeader}>
-              <Text style={styles.chartTitle}>
-                Certificate Completion Status
+          
+          {/* Students List */}
+          <View style={styles.studentsListContainer}>
+            <View style={styles.listHeader}>
+              <Text style={styles.listTitle}>Students</Text>
+              <Text style={styles.listSubtitle}>
+                {filteredStudents.length} of {selectedCertificate?.students.length || 0} students
               </Text>
             </View>
-
-            <View style={styles.pieChartContainer}>
-              <PieChart
-                data={[
-                  {
-                    name: "Signed",
-                    population: mockData.certificates.signed,
-                    color: "#4CAF50",
-                    legendFontColor: "#7F7F7F",
-                    legendFontSize: 14,
-                  },
-                  {
-                    name: "Pending",
-                    population: mockData.certificates.pending,
-                    color: "#FF9800",
-                    legendFontColor: "#7F7F7F",
-                    legendFontSize: 14,
-                  },
-                ]}
-                width={width - 64}
-                height={220}
-                chartConfig={{
-                  backgroundColor: "#fff",
-                  backgroundGradientFrom: "#fff",
-                  backgroundGradientTo: "#fff",
-                  color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-                }}
-                accessor="population"
-                backgroundColor="transparent"
-                paddingLeft="15"
-                absolute
+            
+            {filteredStudents.length > 0 ? (
+              <FlatList
+                data={filteredStudents}
+                renderItem={renderStudentItem}
+                keyExtractor={item => item.id}
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={styles.studentsList}
               />
-            </View>
-
-            <View style={styles.certificateStatusSummary}>
-              <View style={styles.statusItem}>
-                <View
-                  style={[styles.statusDot, { backgroundColor: "#4CAF50" }]}
-                />
-                <Text style={styles.statusLabel}>Signed:</Text>
-                <Text style={styles.statusValue}>
-                  {mockData.certificates.signed.toLocaleString()}
-                </Text>
-                <Text style={styles.statusPercent}>
-                  (
-                  {Math.round(
-                    (mockData.certificates.signed /
-                      mockData.certificates.total) *
-                      100
-                  )}
-                  %)
-                </Text>
+            ) : (
+              <View style={styles.emptyState}>
+                <MaterialCommunityIcons name="account-search-outline" size={60} color="#d1d1d1" />
+                <Text style={styles.emptyStateText}>No students found</Text>
+                <Text style={styles.emptyStateSubtext}>Try adjusting your search</Text>
               </View>
-
-              <View style={styles.statusItem}>
-                <View
-                  style={[styles.statusDot, { backgroundColor: "#FF9800" }]}
-                />
-                <Text style={styles.statusLabel}>Pending:</Text>
-                <Text style={styles.statusValue}>
-                  {mockData.certificates.pending.toLocaleString()}
-                </Text>
-                <Text style={styles.statusPercent}>
-                  (
-                  {Math.round(
-                    (mockData.certificates.pending /
-                      mockData.certificates.total) *
-                      100
-                  )}
-                  %)
-                </Text>
-              </View>
-            </View>
-          </Surface>
-        </View>
-
-        {/* Quick Actions */}
-        <View style={styles.quickActionsSection}>
-          <View style={styles.sectionHeader}>
-            <View style={styles.sectionTitleContainer}>
-              <MaterialIcons
-                name="flash-on"
-                size={22}
-                color="#374785"
-                style={styles.sectionIcon}
-              />
-              <Text style={styles.sectionTitle}>Quick Actions</Text>
-            </View>
+            )}
           </View>
-
-          <View style={styles.quickActionsGrid}>
-            <TouchableOpacity style={styles.quickActionCard}>
-              <View
-                style={[styles.quickActionIcon, { backgroundColor: "#1976D2" }]}
-              >
-                <MaterialIcons name="person-add" size={24} color="#fff" />
-              </View>
-              <Text style={styles.quickActionText}>Add Student</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.quickActionCard}>
-              <View
-                style={[styles.quickActionIcon, { backgroundColor: "#4CAF50" }]}
-              >
-                <MaterialIcons name="person-add" size={24} color="#fff" />
-              </View>
-              <Text style={styles.quickActionText}>Add Teacher</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.quickActionCard}>
-              <View
-                style={[styles.quickActionIcon, { backgroundColor: "#9C27B0" }]}
-              >
-                <MaterialIcons name="business" size={24} color="#fff" />
-              </View>
-              <Text style={styles.quickActionText}>Add Company</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.quickActionCard}>
-              <View
-                style={[styles.quickActionIcon, { backgroundColor: "#FF9800" }]}
-              >
-                <MaterialCommunityIcons
-                  name="certificate"
-                  size={24}
-                  color="#fff"
-                />
-              </View>
-              <Text style={styles.quickActionText}>Issue Certificate</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.quickActionCard}>
-              <View
-                style={[styles.quickActionIcon, { backgroundColor: "#607D8B" }]}
-              >
-                <MaterialIcons name="settings" size={24} color="#fff" />
-              </View>
-              <Text style={styles.quickActionText}>Settings</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.quickActionCard}>
-              <View
-                style={[styles.quickActionIcon, { backgroundColor: "#E91E63" }]}
-              >
-                <MaterialIcons name="help" size={24} color="#fff" />
-              </View>
-              <Text style={styles.quickActionText}>Help</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* Bottom padding */}
-        <View style={styles.bottomPadding} />
-      </AnimatedScrollView>
+        </SafeAreaView>
+      </Modal>
     </SafeAreaView>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f8f9fa",
   },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#f8f9fa",
-  },
-  loadingImage: {
-    width: 120,
-    height: 120,
-    marginBottom: 20,
-  },
-  loadingIndicator: {
-    marginBottom: 16,
-  },
-  loadingText: {
-    fontSize: 16,
-    color: "#666",
-  },
-  headerContainer: {
-    width: "100%",
-    overflow: "hidden",
-  },
-  headerBackground: {
-    flex: 1,
-    width: "100%",
-  },
-  headerBackgroundImage: {
-    opacity: 0.9,
-  },
-  headerGradient: {
-    flex: 1,
-    justifyContent: "space-between",
-    padding: 20,
-  },
-  compactHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    height: 60,
-    paddingHorizontal: 10,
-  },
-  compactHeaderTitle: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  compactHeaderActions: {
-    flexDirection: "row",
-  },
-  headerContent: {
-    flex: 1,
-    justifyContent: "flex-end",
+  header: {
+    backgroundColor: "#ffffff",
+    paddingHorizontal: 20,
+    paddingTop: 15,
+    paddingBottom: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f0f0f0",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 3,
   },
   headerTop: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    marginBottom: 15,
   },
-  welcomeText: {
-    color: "rgba(255, 255, 255, 0.9)",
-    fontSize: 16,
-    fontWeight: "500",
+  logoContainer: {
+    flexDirection: "row",
+    alignItems: "center",
   },
-  userName: {
-    color: "#fff",
-    fontSize: 24,
+  logo: {
+    width: 40,
+    height: 40,
+    borderRadius: 8,
+  },
+  companyName: {
+    fontSize: 18,
     fontWeight: "bold",
-    marginBottom: 4,
-  },
-  userRole: {
-    color: "rgba(255, 255, 255, 0.8)",
-    fontSize: 14,
+    marginLeft: 10,
+    color: "#333",
   },
   headerActions: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
   },
-  headerActionButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
+  iconButton: {
+    padding: 8,
+    position: "relative",
+  },
+  badge: {
+    position: "absolute",
+    top: 5,
+    right: 5,
+    backgroundColor: "#EF4637",
+    borderRadius: 10,
+    width: 18,
+    height: 18,
     justifyContent: "center",
     alignItems: "center",
+    borderWidth: 1.5,
+    borderColor: "#ffffff",
   },
-  avatar: {
+  badgeText: {
+    color: "#ffffff",
+    fontSize: 10,
+    fontWeight: "bold",
+  },
+  profileButton: {
+    marginLeft: 5,
+  },
+  profileImage: {
+    width: 35,
+    height: 35,
+    borderRadius: 17.5,
     borderWidth: 2,
-    borderColor: "#fff",
+    borderColor: "#EF4637",
   },
-  searchBarContainer: {
-    position: "absolute",
-    top: 30,
-    left: 0,
-    right: 0,
-    zIndex: 999,
+  welcomeSection: {
+    marginTop: 5,
   },
-  searchBarBlur: {
-    padding: 15,
-    paddingTop: Platform.OS === "ios" ? 50 : 15,
+  welcomeText: {
+    fontSize: 14,
+    color: "#6c757d",
+  },
+  employerName: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: "#333",
+  },
+  searchContainer: {
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    backgroundColor: "#ffffff",
   },
   searchBar: {
-    elevation: 0,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#f1f3f5",
     borderRadius: 10,
-    backgroundColor: "#fff",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
   },
-  content: {
+  searchIcon: {
+    marginRight: 10,
+  },
+  searchInput: {
     flex: 1,
+    fontSize: 16,
+    color: "#333",
+  },
+  categoriesContainer: {
+    paddingVertical: 10,
+    backgroundColor: "#ffffff",
+    borderBottomWidth: 1,
+    borderBottomColor: "#f0f0f0",
+  },
+  categoriesList: {
+    paddingHorizontal: 15,
+  },
+  categoryItem: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: "#f1f3f5",
+    marginRight: 10,
+  },
+  selectedCategoryItem: {
+    backgroundColor: "#EF4637",
+  },
+  categoryItemText: {
+    fontSize: 14,
+    color: "#495057",
+    fontWeight: "500",
+  },
+  selectedCategoryItemText: {
+    color: "#ffffff",
+    fontWeight: "bold",
   },
   contentContainer: {
-    padding: 16,
-    paddingBottom: 40,
-  },
-  statsGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-  },
-  statsCard: {
-    width: "48%",
-    borderRadius: 16,
-    overflow: "hidden",
-    elevation: 4,
-    marginBottom: 16,
-  },
-  statsCardGradient: {
-    borderRadius: 16,
-    padding: 16,
-  },
-  statsCardHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  statsIconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  studentsIconContainer: {
-    backgroundColor: "#1976D2",
-  },
-  teachersIconContainer: {
-    backgroundColor: "#4CAF50",
-  },
-  companiesIconContainer: {
-    backgroundColor: "#9C27B0",
-  },
-  certificatesIconContainer: {
-    backgroundColor: "#FF9800",
-  },
-  statsHeaderRight: {
-    alignItems: "flex-end",
-  },
-  statsGrowth: {
-    fontSize: 12,
-    fontWeight: "500",
-    color: "#4CAF50",
-  },
-  statsNumber: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#333",
-    marginBottom: 4,
-  },
-  statsTitle: {
-    fontSize: 14,
-    color: "#666",
-    marginBottom: 16,
-  },
-  statsDetails: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 16,
-  },
-  statsDetailItem: {
     flex: 1,
-    alignItems: "center",
-  },
-  statsDetailDivider: {
-    width: 1,
-    height: "100%",
-    backgroundColor: "#eee",
-  },
-  statsDetailValue: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#333",
-    marginBottom: 4,
-  },
-  statsDetailLabel: {
-    fontSize: 12,
-    color: "#666",
-  },
-  statsProgressContainer: {
-    marginTop: 4,
-  },
-  statsProgressLabels: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 4,
-  },
-  statsProgressLabel: {
-    fontSize: 12,
-    color: "#666",
-  },
-  statsProgressValue: {
-    fontSize: 12,
-    fontWeight: "bold",
-    color: "#333",
-  },
-  statsProgress: {
-    height: 6,
-    borderRadius: 3,
+    padding: 20,
   },
   sectionHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginTop: 10,
-    marginBottom: 16,
-  },
-  sectionTitleContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  sectionIcon: {
-    marginRight: 8,
+    marginBottom: 15,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: "bold",
     color: "#333",
   },
-  seeAllButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "rgba(55, 71, 133, 0.1)",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
-  },
   seeAllText: {
-    color: "#374785",
     fontSize: 14,
+    color: "#EF4637",
     fontWeight: "500",
-    marginRight: 4,
   },
-  chartsSection: {
-    marginBottom: 20,
+  certificatesList: {
+    paddingBottom: 20,
   },
-  chartCard: {
-    borderRadius: 16,
+  certificateCard: {
+    borderRadius: 12,
+    marginBottom: 15,
+    backgroundColor: "#ffffff",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
     overflow: "hidden",
-    elevation: 4,
-    marginBottom: 16,
+  },
+  cardGradient: {
     padding: 16,
   },
-  chartCardHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  chartTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#333",
-  },
-  chartLegend: {
+  certificateHeader: {
     flexDirection: "row",
     alignItems: "center",
   },
-  legendItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginLeft: 12,
-  },
-  legendColor: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    marginRight: 4,
-  },
-  legendText: {
-    fontSize: 12,
-    color: "#666",
-  },
-  chartScrollView: {
-    marginHorizontal: -16,
-  },
-  chart: {
-    marginHorizontal: 16,
-    borderRadius: 16,
-  },
-  chartAction: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "rgba(55, 71, 133, 0.1)",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
-  },
-  chartActionText: {
-    color: "#374785",
-    fontSize: 12,
-    fontWeight: "500",
-    marginRight: 4,
-  },
-  pieChartContainer: {
-    alignItems: "center",
-  },
-  activitySection: {
-    marginBottom: 20,
-  },
-  activityCard: {
-    borderRadius: 16,
-    overflow: "hidden",
-    elevation: 4,
-    padding: 16,
-  },
-  activityItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 12,
-  },
-  activityIconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "rgba(55, 71, 133, 0.1)",
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 12,
-  },
-  activityContent: {
-    flex: 1,
-  },
-  activityAction: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: "#333",
-    marginBottom: 2,
-  },
-  activityName: {
-    fontSize: 12,
-    color: "#666",
-  },
-  activityTime: {
-    fontSize: 12,
-    color: "#999",
-  },
-  activityDivider: {
-    backgroundColor: "#eee",
-  },
-  quickActionsSection: {
-    marginBottom: 20,
-  },
-  quickActionsGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-  },
-  quickActionCard: {
-    width: "31%",
-    backgroundColor: "#fff",
-    borderRadius: 16,
-    padding: 16,
-    alignItems: "center",
-    elevation: 2,
-    marginBottom: 12,
-  },
-  quickActionIcon: {
+  iconContainer: {
     width: 50,
     height: 50,
     borderRadius: 25,
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 8,
+    marginRight: 15,
   },
-  quickActionText: {
-    fontSize: 12,
-    fontWeight: "500",
+  certificateInfo: {
+    flex: 1,
+  },
+  certificateName: {
+    fontSize: 16,
+    fontWeight: "bold",
     color: "#333",
-    textAlign: "center",
+    marginBottom: 2,
   },
-  fab: {
-    position: "absolute",
-    bottom: 20,
-    right: 20,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    elevation: 5,
-    overflow: "hidden",
+  certificateIssuer: {
+    fontSize: 14,
+    color: "#6c757d",
+    marginBottom: 2,
   },
-  fabGradient: {
-    width: "100%",
-    height: "100%",
-    justifyContent: "center",
+  certificateDate: {
+    fontSize: 12,
+    color: "#adb5bd",
+  },
+  certificateFooter: {
+    flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: "#f0f0f0",
   },
-  bottomPadding: {
-    height: 80,
+  categoryBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    backgroundColor: "#f8f9fa",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#e9ecef",
   },
-  simpleStatsCard: {
-    width: "48%",
-    borderRadius: 16,
-    overflow: "hidden",
-    elevation: 4,
-    marginBottom: 16,
-    backgroundColor: "#fff",
+  categoryText: {
+    fontSize: 12,
+    color: "#495057",
   },
-  simpleStatsContent: {
-    padding: 16,
+  studentsContainer: {
     flexDirection: "row",
     alignItems: "center",
   },
-  simpleStatsIcon: {
-    width: 56,
-    height: 56,
-    borderRadius: 16,
+  studentsCount: {
+    fontSize: 12,
+    color: "#6c757d",
+    marginLeft: 5,
+  },
+  emptyState: {
+    flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 16,
+    paddingVertical: 50,
   },
-  simpleStatsTextContainer: {
+  emptyStateText: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#6c757d",
+    marginTop: 15,
+  },
+  emptyStateSubtext: {
+    fontSize: 14,
+    color: "#adb5bd",
+    marginTop: 5,
+  },
+  bottomNav: {
+    flexDirection: "row",
+    backgroundColor: "#ffffff",
+    paddingVertical: 12,
+    borderTopWidth: 1,
+    borderTopColor: "#f0f0f0",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 5,
+  },
+  navItem: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  navText: {
+    fontSize: 12,
+    marginTop: 4,
+    color: "#6c757d",
+  },
+  activeNavText: {
+    color: "#EF4637",
+    fontWeight: "bold",
+  },
+  
+  // Modal Styles
+  modalContainer: {
+    flex: 1,
+    backgroundColor: "#f8f9fa",
+  },
+  modalHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    backgroundColor: "#ffffff",
+    borderBottomWidth: 1,
+    borderBottomColor: "#f0f0f0",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  backButton: {
+    padding: 8,
+  },
+  modalTitleContainer: {
+    flex: 1,
+    marginLeft: 10,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333",
+  },
+  modalSubtitle: {
+    fontSize: 14,
+    color: "#6c757d",
+  },
+  modalActionButton: {
+    padding: 8,
+  },
+  certificateDetailCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#ffffff",
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f0f0f0",
+  },
+  certificateIconLarge: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 20,
+  },
+  certificateDetailInfo: {
     flex: 1,
   },
-  simpleStatsNumber: {
-    fontSize: 24,
+  certificateDetailName: {
+    fontSize: 20,
     fontWeight: "bold",
     color: "#333",
     marginBottom: 4,
   },
-  simpleStatsTitle: {
+  certificateDetailIssuer: {
+    fontSize: 16,
+    color: "#6c757d",
+    marginBottom: 2,
+  },
+  certificateDetailDate: {
     fontSize: 14,
-    color: "#666",
+    color: "#adb5bd",
+    marginBottom: 8,
   },
-  certificateStatusSummary: {
-    marginTop: 20,
-    paddingHorizontal: 16,
-  },
-  statusItem: {
+  certificateStats: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 12,
   },
-  statusDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    marginRight: 8,
-  },
-  statusLabel: {
-    fontSize: 16,
-    fontWeight: "500",
-    color: "#333",
-    marginRight: 8,
-    width: 70,
-  },
-  statusValue: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#333",
-    marginRight: 8,
-  },
-  statusPercent: {
-    fontSize: 14,
-    color: "#666",
-  },
-  searchItem: {
+  statBadge: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
-  },
-  searchItemIcon: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    backgroundColor: "#f1f3f5",
+    borderRadius: 15,
     marginRight: 10,
   },
-  searchItemText: {
-    flex: 1,
+  statText: {
+    fontSize: 12,
+    color: "#6c757d",
+    marginLeft: 5,
   },
-  searchItemName: {
+  studentSearchContainer: {
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    backgroundColor: "#ffffff",
+    borderBottomWidth: 1,
+    borderBottomColor: "#f0f0f0",
+  },
+  studentSearchBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#f1f3f5",
+    borderRadius: 10,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+  },
+  studentsListContainer: {
+    flex: 1,
+    padding: 20,
+  },
+  listHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 15,
+  },
+  listTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333",
+  },
+  listSubtitle: {
+    fontSize: 14,
+    color: "#6c757d",
+  },
+  studentsList: {
+    paddingBottom: 20,
+  },
+  studentCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#ffffff",
+    borderRadius: 12,
+    padding: 15,
+    marginBottom: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  studentAvatar: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: "#f1f3f5",
+  },
+  studentInfo: {
+    flex: 1,
+    marginLeft: 15,
+  },
+  studentName: {
     fontSize: 16,
     fontWeight: "bold",
+    color: "#333",
+    marginBottom: 2,
   },
-  searchItemEmail: {
+  studentEmail: {
     fontSize: 14,
-    color: "#888",
+    color: "#6c757d",
+    marginBottom: 5,
   },
-  searchResultsContainer: {
-    backgroundColor: "#fff",
-    marginHorizontal: 20,
-    borderRadius: 10,
-    marginTop: 10,
-    maxHeight: 200,
+  studentDetails: {
+    flexDirection: "row",
+    alignItems: "center",
   },
-  searchResultsList: {
-    padding: 10,
+  detailItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginRight: 15,
+  },
+  detailText: {
+    fontSize: 12,
+    color: "#6c757d",
+    marginLeft: 5,
+  },
+  studentActions: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  actionButton: {
+    padding: 8,
+    marginLeft: 5,
   },
 });
+
+export default EmployerHomePage;
