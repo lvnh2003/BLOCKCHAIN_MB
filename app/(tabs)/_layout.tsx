@@ -20,7 +20,7 @@ export default function AppLayout() {
         <Tabs.Screen
           name="teachers"
           options={{
-            title: 'Teachers',
+            title: 'Users',
             headerShown: false,
             tabBarIcon: ({ color, size }) => (
               <MaterialCommunityIcons name="account-group" color={color} size={size} />

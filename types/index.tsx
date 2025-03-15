@@ -1,9 +1,11 @@
 export interface User {
   code: string;
-  password: string;
+  password?: string;
   role?: "STUDENT" | "TEACHER" | "MASTER";
   name?: string;
   id?: string;
+  avatar?: string,
+  birthdate?: string,
 }
 
 export interface Teacher {
