@@ -15,7 +15,7 @@ function AuthRedirect() {
       } else if (user.role === "STUDENT") {
         router.replace("/(student)");
       } else if (user.role === "MASTER") {
-        router.replace("/(tabs)");
+        router.replace("/(company)");
       }
     } else {
       router.replace("/(auth)/login");
@@ -33,6 +33,7 @@ function RootLayoutNav() {
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="(teacher)" options={{ headerShown: false }} />
         <Stack.Screen name="(student)" options={{ headerShown: false }} />
+        <Stack.Screen name="(company)" options={{ headerShown: false }} />
       </Stack>
       <AuthRedirect />
     </>
