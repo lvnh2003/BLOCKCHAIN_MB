@@ -4,9 +4,10 @@ export interface User {
   role?: "STUDENT" | "TEACHER" | "MASTER";
   name?: string;
   id?: string;
-  avatar?: string,
-  birthdate?: string,
-  email?: string
+  avatar?: string;
+  birthdate?: string;
+  image?: string;
+  dateOfBirth?: string;
 }
 
 export interface Teacher {
@@ -23,12 +24,12 @@ export interface Certificate {
   imageUrl?: string;
   description?: string;
   status?: "SIGNED" | "PENDING" | "APPROVED";
-  certificateType? : CertificateType;
-  certId? : string;
+  certificateType?: CertificateType;
+  certId?: string;
 }
-export interface CertificateType{
+export interface CertificateType {
   id?: string;
-  name: string
+  name: string;
 }
 export interface Student {
   id: string;
@@ -36,7 +37,6 @@ export interface Student {
   score: number;
   status: "pending" | "signed";
 }
-
 
 // TEACHER
 
@@ -54,16 +54,16 @@ interface StudentInfoTeacher {
 }
 
 export interface CertificateResponeTeacher {
-  certificate: Certificate,
-  studentInfor: StudentInfoTeacher,
-  certificateType: CertificateType
+  certificate: Certificate;
+  studentInfor: StudentInfoTeacher;
+  certificateType: CertificateType;
 }
 
 export interface StudentOfCertificateResponse {
   id: string;
   createdAt: number;
   name: string;
-  score: 99,
+  score: 99;
   role: "STUDENT" | "TEACHER" | "MASTER";
   certificate: {
     createdAt: number;

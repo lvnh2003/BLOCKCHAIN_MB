@@ -12,305 +12,356 @@ import {
   StatusBar,
   Dimensions,
   Modal,
-  Platform
+  Platform,
 } from "react-native";
-import { MaterialCommunityIcons, Ionicons, Feather, AntDesign } from "@expo/vector-icons";
+import {
+  MaterialCommunityIcons,
+  Ionicons,
+  Feather,
+  AntDesign,
+} from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { Certificate, Student } from "@/types";
+import {
+  CertificateResponse,
+  getCertificates,
+} from "@/apis/company/get-certificate";
+import {
+  getStudentByType,
+  StudentCertificatesResponse,
+} from "@/apis/company/get-student-by-type";
+import { useAuth } from "@/context/AuthContext";
 
 // Sample data for certificates with students
 const certificatesData = [
-  { 
-    id: '1', 
-    name: 'Web Development', 
-    issuer: 'Tech Academy',
-    date: 'June 2023',
-    icon: 'https://via.placeholder.com/60',
-    color: '#4CAF50',
+  {
+    id: "1",
+    name: "Web Development",
+    issuer: "Tech Academy",
+    date: "June 2023",
+    icon: "https://via.placeholder.com/60",
+    color: "#4CAF50",
     students: [
-      { 
-        id: '101', 
-        name: 'John Doe', 
-        avatar: 'https://via.placeholder.com/50', 
-        achievementDate: '15 Jan 2023',
-        score: '95/100',
-        email: 'john.doe@example.com',
-        role: 'STUDENT'
+      {
+        id: "101",
+        name: "John Doe",
+        avatar: "https://via.placeholder.com/50",
+        achievementDate: "15 Jan 2023",
+        score: "95/100",
+        email: "john.doe@example.com",
+        role: "STUDENT",
       },
-      { 
-        id: '102', 
-        name: 'Jane Smith', 
-        avatar: 'https://via.placeholder.com/50', 
-        achievementDate: '20 Feb 2023',
-        score: '92/100',
-        email: 'jane.smith@example.com',
-        role: 'STUDENT'
+      {
+        id: "102",
+        name: "Jane Smith",
+        avatar: "https://via.placeholder.com/50",
+        achievementDate: "20 Feb 2023",
+        score: "92/100",
+        email: "jane.smith@example.com",
+        role: "STUDENT",
       },
-      { 
-        id: '103', 
-        name: 'Mike Johnson', 
-        avatar: 'https://via.placeholder.com/50', 
-        achievementDate: '5 Mar 2023',
-        score: '88/100',
-        email: 'mike.johnson@example.com',
-        role: 'STUDENT'
+      {
+        id: "103",
+        name: "Mike Johnson",
+        avatar: "https://via.placeholder.com/50",
+        achievementDate: "5 Mar 2023",
+        score: "88/100",
+        email: "mike.johnson@example.com",
+        role: "STUDENT",
       },
-      { 
-        id: '104', 
-        name: 'Sarah Williams', 
-        avatar: 'https://via.placeholder.com/50', 
-        achievementDate: '12 Apr 2023',
-        score: '97/100',
-        email: 'sarah.williams@example.com',
-        role: 'STUDENT'
+      {
+        id: "104",
+        name: "Sarah Williams",
+        avatar: "https://via.placeholder.com/50",
+        achievementDate: "12 Apr 2023",
+        score: "97/100",
+        email: "sarah.williams@example.com",
+        role: "STUDENT",
       },
     ],
-    category: 'Programming'
+    category: "Programming",
   },
-  { 
-    id: '2', 
-    name: 'Data Science', 
-    issuer: 'Data Institute',
-    date: 'August 2023',
-    icon: 'https://via.placeholder.com/60',
-    color: '#2196F3',
+  {
+    id: "2",
+    name: "Data Science",
+    issuer: "Data Institute",
+    date: "August 2023",
+    icon: "https://via.placeholder.com/60",
+    color: "#2196F3",
     students: [
-      { 
-        id: '201', 
-        name: 'Robert Brown', 
-        avatar: 'https://via.placeholder.com/50', 
-        achievementDate: '10 May 2023',
-        score: '91/100',
-        email: 'robert.brown@example.com',
-        role: 'STUDENT'
+      {
+        id: "201",
+        name: "Robert Brown",
+        avatar: "https://via.placeholder.com/50",
+        achievementDate: "10 May 2023",
+        score: "91/100",
+        email: "robert.brown@example.com",
+        role: "STUDENT",
       },
-      { 
-        id: '202', 
-        name: 'Emily Davis', 
-        avatar: 'https://via.placeholder.com/50', 
-        achievementDate: '15 Jun 2023',
-        score: '89/100',
-        email: 'emily.davis@example.com',
-        role: 'STUDENT'
+      {
+        id: "202",
+        name: "Emily Davis",
+        avatar: "https://via.placeholder.com/50",
+        achievementDate: "15 Jun 2023",
+        score: "89/100",
+        email: "emily.davis@example.com",
+        role: "STUDENT",
       },
     ],
-    category: 'Data'
+    category: "Data",
   },
-  { 
-    id: '3', 
-    name: 'Mobile App Development', 
-    issuer: 'App Academy',
-    date: 'July 2023',
-    icon: 'https://via.placeholder.com/60',
-    color: '#FF9800',
+  {
+    id: "3",
+    name: "Mobile App Development",
+    issuer: "App Academy",
+    date: "July 2023",
+    icon: "https://via.placeholder.com/60",
+    color: "#FF9800",
     students: [
-      { 
-        id: '301', 
-        name: 'David Wilson', 
-        avatar: 'https://via.placeholder.com/50', 
-        achievementDate: '20 Jul 2023',
-        score: '94/100',
-        email: 'david.wilson@example.com',
-        role: 'STUDENT'
+      {
+        id: "301",
+        name: "David Wilson",
+        avatar: "https://via.placeholder.com/50",
+        achievementDate: "20 Jul 2023",
+        score: "94/100",
+        email: "david.wilson@example.com",
+        role: "STUDENT",
       },
-      { 
-        id: '302', 
-        name: 'Lisa Martinez', 
-        avatar: 'https://via.placeholder.com/50', 
-        achievementDate: '25 Aug 2023',
-        score: '90/100',
-        email: 'lisa.martinez@example.com',
-        role: 'STUDENT'
+      {
+        id: "302",
+        name: "Lisa Martinez",
+        avatar: "https://via.placeholder.com/50",
+        achievementDate: "25 Aug 2023",
+        score: "90/100",
+        email: "lisa.martinez@example.com",
+        role: "STUDENT",
       },
-      { 
-        id: '303', 
-        name: 'James Taylor', 
-        avatar: 'https://via.placeholder.com/50', 
-        achievementDate: '30 Sep 2023',
-        score: '86/100',
-        email: 'james.taylor@example.com',
-        role: 'STUDENT'
+      {
+        id: "303",
+        name: "James Taylor",
+        avatar: "https://via.placeholder.com/50",
+        achievementDate: "30 Sep 2023",
+        score: "86/100",
+        email: "james.taylor@example.com",
+        role: "STUDENT",
       },
     ],
-    category: 'Programming'
+    category: "Programming",
   },
-  { 
-    id: '4', 
-    name: 'UI/UX Design', 
-    issuer: 'Design School',
-    date: 'September 2023',
-    icon: 'https://via.placeholder.com/60',
-    color: '#E91E63',
+  {
+    id: "4",
+    name: "UI/UX Design",
+    issuer: "Design School",
+    date: "September 2023",
+    icon: "https://via.placeholder.com/60",
+    color: "#E91E63",
     students: [
-      { 
-        id: '401', 
-        name: 'Patricia Anderson', 
-        avatar: 'https://via.placeholder.com/50', 
-        achievementDate: '5 Oct 2023',
-        score: '98/100',
-        email: 'patricia.anderson@example.com',
-        role: 'STUDENT'
+      {
+        id: "401",
+        name: "Patricia Anderson",
+        avatar: "https://via.placeholder.com/50",
+        achievementDate: "5 Oct 2023",
+        score: "98/100",
+        email: "patricia.anderson@example.com",
+        role: "STUDENT",
       },
-      { 
-        id: '402', 
-        name: 'Thomas Jackson', 
-        avatar: 'https://via.placeholder.com/50', 
-        achievementDate: '10 Nov 2023',
-        score: '93/100',
-        email: 'thomas.jackson@example.com',
-        role: 'STUDENT'
+      {
+        id: "402",
+        name: "Thomas Jackson",
+        avatar: "https://via.placeholder.com/50",
+        achievementDate: "10 Nov 2023",
+        score: "93/100",
+        email: "thomas.jackson@example.com",
+        role: "STUDENT",
       },
     ],
-    category: 'Design'
+    category: "Design",
   },
-  { 
-    id: '5', 
-    name: 'Cloud Computing', 
-    issuer: 'Cloud Institute',
-    date: 'May 2023',
-    icon: 'https://via.placeholder.com/60',
-    color: '#673AB7',
+  {
+    id: "5",
+    name: "Cloud Computing",
+    issuer: "Cloud Institute",
+    date: "May 2023",
+    icon: "https://via.placeholder.com/60",
+    color: "#673AB7",
     students: [
-      { 
-        id: '501', 
-        name: 'Jennifer White', 
-        avatar: 'https://via.placeholder.com/50', 
-        achievementDate: '15 Dec 2023',
-        score: '87/100',
-        email: 'jennifer.white@example.com',
-        role: 'STUDENT'
+      {
+        id: "501",
+        name: "Jennifer White",
+        avatar: "https://via.placeholder.com/50",
+        achievementDate: "15 Dec 2023",
+        score: "87/100",
+        email: "jennifer.white@example.com",
+        role: "STUDENT",
       },
-      { 
-        id: '502', 
-        name: 'Michael Brown', 
-        avatar: 'https://via.placeholder.com/50', 
-        achievementDate: '20 Jan 2024',
-        score: '92/100',
-        email: 'michael.brown@example.com',
-        role: 'STUDENT'
+      {
+        id: "502",
+        name: "Michael Brown",
+        avatar: "https://via.placeholder.com/50",
+        achievementDate: "20 Jan 2024",
+        score: "92/100",
+        email: "michael.brown@example.com",
+        role: "STUDENT",
       },
     ],
-    category: 'Infrastructure'
+    category: "Infrastructure",
   },
-  { 
-    id: '6', 
-    name: 'Digital Marketing', 
-    issuer: 'Marketing Academy',
-    date: 'October 2023',
-    icon: 'https://via.placeholder.com/60',
-    color: '#009688',
+  {
+    id: "6",
+    name: "Digital Marketing",
+    issuer: "Marketing Academy",
+    date: "October 2023",
+    icon: "https://via.placeholder.com/60",
+    color: "#009688",
     students: [
-      { 
-        id: '601', 
-        name: 'Elizabeth Lee', 
-        avatar: 'https://via.placeholder.com/50', 
-        achievementDate: '25 Feb 2024',
-        score: '96/100',
-        email: 'elizabeth.lee@example.com',
-        role: 'STUDENT'
+      {
+        id: "601",
+        name: "Elizabeth Lee",
+        avatar: "https://via.placeholder.com/50",
+        achievementDate: "25 Feb 2024",
+        score: "96/100",
+        email: "elizabeth.lee@example.com",
+        role: "STUDENT",
       },
-      { 
-        id: '602', 
-        name: 'William Garcia', 
-        avatar: 'https://via.placeholder.com/50', 
-        achievementDate: '1 Mar 2024',
-        score: '89/100',
-        email: 'william.garcia@example.com',
-        role: 'STUDENT'
+      {
+        id: "602",
+        name: "William Garcia",
+        avatar: "https://via.placeholder.com/50",
+        achievementDate: "1 Mar 2024",
+        score: "89/100",
+        email: "william.garcia@example.com",
+        role: "STUDENT",
       },
-      { 
-        id: '603', 
-        name: 'Olivia Miller', 
-        avatar: 'https://via.placeholder.com/50', 
-        achievementDate: '5 Apr 2024',
-        score: '91/100',
-        email: 'olivia.miller@example.com',
-        role: 'STUDENT'
+      {
+        id: "603",
+        name: "Olivia Miller",
+        avatar: "https://via.placeholder.com/50",
+        achievementDate: "5 Apr 2024",
+        score: "91/100",
+        email: "olivia.miller@example.com",
+        role: "STUDENT",
       },
     ],
-    category: 'Marketing'
+    category: "Marketing",
   },
 ];
 
-
-const { width } = Dimensions.get('window');
+const { width } = Dimensions.get("window");
 
 const EmployerHomePage = () => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filteredCertificates, setFilteredCertificates] = useState(certificatesData);
-  
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filteredCertificates, setFilteredCertificates] = useState<
+    CertificateResponse[]
+  >([]);
+
   // State for student list modal
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedCertificate, setSelectedCertificate] = useState<Certificate>();
-  const [studentSearchQuery, setStudentSearchQuery] = useState('');
-  const [filteredStudents, setFilteredStudents] = useState([]);
+  const [studentSearchQuery, setStudentSearchQuery] = useState("");
+  const [filteredStudents, setFilteredStudents] = useState<
+    StudentCertificatesResponse[]
+  >([]);
+
+  const { user } = useAuth();
 
   useEffect(() => {
-    let filtered = certificatesData;
-    
-    if (searchQuery) {
-      filtered = filtered.filter(cert => 
-        cert.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        cert.issuer.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
-    
-    
-    setFilteredCertificates(filtered);
+    const fetchCertificates = async () => {
+      try {
+        const mockCertificates: CertificateResponse[] = await getCertificates();
+
+        if (searchQuery) {
+          const filtered = mockCertificates.filter((cert) =>
+            cert.name.toLowerCase().includes(searchQuery.toLowerCase())
+          );
+          setFilteredCertificates(filtered);
+        } else {
+          setFilteredCertificates(mockCertificates);
+        }
+      } catch (error) {
+        console.error("Error fetching certificates:", error);
+      }
+    };
+
+    fetchCertificates();
   }, [searchQuery]);
 
   // Filter students when search query changes or certificate is selected
   useEffect(() => {
     if (!selectedCertificate) return;
-    
-    let students = selectedCertificate.students;
-    
-    if (studentSearchQuery) {
-      students = students.filter(student => 
-        student.name.toLowerCase().includes(studentSearchQuery.toLowerCase()) ||
-        student.email.toLowerCase().includes(studentSearchQuery.toLowerCase())
-      );
-    }
-    
-    setFilteredStudents(students);
+
+    const fetchStudent = async () => {
+      try {
+        const mockCertificates: StudentCertificatesResponse[] =
+          await getStudentByType(selectedCertificate.id);
+        if (studentSearchQuery) {
+          const filtered = mockCertificates.filter((student) =>
+            student.name
+              .toLowerCase()
+              .includes(studentSearchQuery.toLowerCase())
+          );
+          setFilteredStudents(filtered);
+        } else {
+          setFilteredStudents(mockCertificates);
+        }
+      } catch (error) {
+        console.error("Error fetching certificates:", error);
+      }
+    };
+
+    fetchStudent();
   }, [studentSearchQuery, selectedCertificate]);
 
   // Handle certificate selection
   const handleCertificatePress = (certificate: Certificate) => {
     setSelectedCertificate(certificate);
-    setFilteredStudents(certificate.students);
-    setStudentSearchQuery('');
+    // setFilteredStudents(certificate.students);
+    setStudentSearchQuery("");
     setModalVisible(true);
   };
 
   // Render certificate item
   const renderCertificateItem = ({ item }) => (
-    <TouchableOpacity 
+    <TouchableOpacity
       style={styles.certificateCard}
       onPress={() => handleCertificatePress(item)}
     >
       <LinearGradient
-        colors={['#ffffff', '#f8f9fa']}
+        colors={["#ffffff", "#f8f9fa"]}
         style={styles.cardGradient}
       >
         <View style={styles.certificateHeader}>
-          <View style={[styles.iconContainer, { backgroundColor: item.color + '20' }]}>
-            <MaterialCommunityIcons name="certificate" size={28} color={item.color} />
+          <View
+            style={[
+              styles.iconContainer,
+              { backgroundColor: item.color + "20" },
+            ]}
+          >
+            <MaterialCommunityIcons
+              name="certificate"
+              size={28}
+              color={item.color}
+            />
           </View>
           <View style={styles.certificateInfo}>
             <Text style={styles.certificateName}>{item.name}</Text>
-            <Text style={styles.certificateIssuer}>{item.issuer}</Text>
-            <Text style={styles.certificateDate}>{item.date}</Text>
+            <Text style={styles.certificateIssuer}>{item.name}</Text>
+            <Text style={styles.certificateDate}>{item.createdAt}</Text>
           </View>
         </View>
-        
+
         <View style={styles.certificateFooter}>
           <View style={styles.categoryBadge}>
-            <Text style={styles.categoryText}>{item.category}</Text>
+            <Text style={styles.categoryText}>{item.name}</Text>
           </View>
           <View style={styles.studentsContainer}>
-            <MaterialCommunityIcons name="account-group" size={18} color="#6c757d" />
-            <Text style={styles.studentsCount}>{item.students.length} Students</Text>
+            <MaterialCommunityIcons
+              name="account-group"
+              size={18}
+              color="#6c757d"
+            />
+            <Text style={styles.studentsCount}>
+              {filteredStudents.length} Students
+            </Text>
           </View>
         </View>
       </LinearGradient>
@@ -318,8 +369,12 @@ const EmployerHomePage = () => {
   );
 
   // Render student item
-  const renderStudentItem = ({ item }:{item: Student}) => (
-    <TouchableOpacity 
+  const renderStudentItem = ({
+    item,
+  }: {
+    item: StudentCertificatesResponse;
+  }) => (
+    <TouchableOpacity
       style={styles.studentCard}
       onPress={() => {
         // Navigate to student profile or show more details
@@ -327,23 +382,30 @@ const EmployerHomePage = () => {
         // navigation?.navigate('StudentProfile', { student: item });
       }}
     >
-      <Image source={{ uri: item.avatar }} style={styles.studentAvatar} />
-      
+      <Image
+        source={{
+          uri:
+            item.avatar ||
+            "https://hoanghamobile.com/tin-tuc/wp-content/uploads/2024/07/anh-avatar-dep-cho-con-gai-1.jpg",
+        }}
+        style={styles.studentAvatar}
+      />
+
       <View style={styles.studentInfo}>
         <Text style={styles.studentName}>{item.name}</Text>
-        <Text style={styles.studentEmail}>{item.email}</Text>
+        <Text style={styles.studentEmail}>{item.code}</Text>
         <View style={styles.studentDetails}>
           <View style={styles.detailItem}>
             <MaterialCommunityIcons name="calendar" size={14} color="#6c757d" />
-            <Text style={styles.detailText}>{item.achievementDate}</Text>
+            <Text style={styles.detailText}>{item.dateOfBirth}</Text>
           </View>
           <View style={styles.detailItem}>
             <MaterialCommunityIcons name="star" size={14} color="#FFD700" />
-            <Text style={styles.detailText}>{item.score}</Text>
+            <Text style={styles.detailText}>{item.certificate.score}</Text>
           </View>
         </View>
       </View>
-      
+
       <View style={styles.studentActions}>
         <TouchableOpacity style={styles.actionButton}>
           <Feather name="mail" size={18} color="#2196F3" />
@@ -355,42 +417,48 @@ const EmployerHomePage = () => {
     </TouchableOpacity>
   );
 
-
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
-      
+
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerTop}>
           <View style={styles.logoContainer}>
-            <Image 
-              source={{ uri: 'https://via.placeholder.com/40' }} 
-              style={styles.logo} 
+            <Image
+              source={{
+                uri: "https://vareno.vn/wp-content/uploads/2024/07/Environment-logo-53.webp",
+              }}
+              style={styles.logo}
             />
-            <Text style={styles.companyName}>TalentHub</Text>
+            <Text style={styles.companyName}>{user?.name}</Text>
           </View>
-          
+
           <View style={styles.headerActions}>
             <TouchableOpacity style={styles.profileButton}>
-              <Image 
-                source={{ uri: 'https://via.placeholder.com/30' }} 
-                style={styles.profileImage} 
+              <Image
+                source={{ uri: "https://via.placeholder.com/30" }}
+                style={styles.profileImage}
               />
             </TouchableOpacity>
           </View>
         </View>
-        
+
         <View style={styles.welcomeSection}>
           <Text style={styles.welcomeText}>Welcome back,</Text>
           <Text style={styles.employerName}>Employer Inc.</Text>
         </View>
       </View>
-      
+
       {/* Search Bar */}
       <View style={styles.searchContainer}>
         <View style={styles.searchBar}>
-          <Feather name="search" size={20} color="#6c757d" style={styles.searchIcon} />
+          <Feather
+            name="search"
+            size={20}
+            color="#6c757d"
+            style={styles.searchIcon}
+          />
           <TextInput
             style={styles.searchInput}
             placeholder="Search certificates or issuers..."
@@ -399,13 +467,13 @@ const EmployerHomePage = () => {
             placeholderTextColor="#6c757d"
           />
           {searchQuery.length > 0 && (
-            <TouchableOpacity onPress={() => setSearchQuery('')}>
+            <TouchableOpacity onPress={() => setSearchQuery("")}>
               <Feather name="x" size={20} color="#6c757d" />
             </TouchableOpacity>
           )}
         </View>
       </View>
-      
+
       {/* Main Content */}
       <View style={styles.contentContainer}>
         <View style={styles.sectionHeader}>
@@ -414,25 +482,30 @@ const EmployerHomePage = () => {
             <Text style={styles.seeAllText}>See All</Text>
           </TouchableOpacity>
         </View>
-        
-        {filteredCertificates.length > 0 ? (
+
+        {filteredCertificates ? (
           <FlatList
             data={filteredCertificates}
             renderItem={renderCertificateItem}
-            keyExtractor={item => item.id}
+            keyExtractor={(item) => item.id}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.certificatesList}
           />
         ) : (
           <View style={styles.emptyState}>
-            <MaterialCommunityIcons name="certificate-outline" size={60} color="#d1d1d1" />
+            <MaterialCommunityIcons
+              name="certificate-outline"
+              size={60}
+              color="#d1d1d1"
+            />
             <Text style={styles.emptyStateText}>No certificates found</Text>
-            <Text style={styles.emptyStateSubtext}>Try adjusting your search or filters</Text>
+            <Text style={styles.emptyStateSubtext}>
+              Try adjusting your search or filters
+            </Text>
           </View>
         )}
       </View>
-    
-      
+
       {/* Students List Modal */}
       <Modal
         animationType="slide"
@@ -443,49 +516,79 @@ const EmployerHomePage = () => {
         <SafeAreaView style={styles.modalContainer}>
           {/* Modal Header */}
           <View style={styles.modalHeader}>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.backButton}
               onPress={() => setModalVisible(false)}
             >
               <AntDesign name="arrowleft" size={24} color="#333" />
             </TouchableOpacity>
-            
+
             {selectedCertificate && (
               <View style={styles.modalTitleContainer}>
-                <Text style={styles.modalTitle}>{selectedCertificate.certificateType?.name}</Text>
+                <Text style={styles.modalTitle}>
+                  {selectedCertificate.certificateType?.name}
+                </Text>
               </View>
             )}
-            
+
             <TouchableOpacity style={styles.modalActionButton}>
-              <MaterialCommunityIcons name="export-variant" size={24} color="#333" />
+              <MaterialCommunityIcons
+                name="export-variant"
+                size={24}
+                color="#333"
+              />
             </TouchableOpacity>
           </View>
-          
+
           {/* Certificate Details */}
           {selectedCertificate && (
             <View style={styles.certificateDetailCard}>
-              <View style={[styles.certificateIconLarge, { backgroundColor: selectedCertificate.color + '20' }]}>
-                <MaterialCommunityIcons name="certificate" size={40} color={selectedCertificate.color} />
+              <View
+                style={[
+                  styles.certificateIconLarge,
+                  { backgroundColor: selectedCertificate.color + "20" },
+                ]}
+              >
+                <MaterialCommunityIcons
+                  name="certificate"
+                  size={40}
+                  color={selectedCertificate.color}
+                />
               </View>
-              
+
               <View style={styles.certificateDetailInfo}>
-                <Text style={styles.certificateDetailName}>{selectedCertificate.certificateType?.name}</Text>
-                <Text style={styles.certificateDetailDate}>Created at: {selectedCertificate.createdAt}</Text>
-                
+                <Text style={styles.certificateDetailName}>
+                  {selectedCertificate.name}
+                </Text>
+                <Text style={styles.certificateDetailDate}>
+                  Created at: {selectedCertificate.createdAt}
+                </Text>
+
                 <View style={styles.certificateStats}>
                   <View style={styles.statBadge}>
-                    <MaterialCommunityIcons name="account-group" size={16} color="#6c757d" />
-                    <Text style={styles.statText}>{selectedCertificate.students.length} Students</Text>
+                    <MaterialCommunityIcons
+                      name="account-group"
+                      size={16}
+                      color="#6c757d"
+                    />
+                    <Text style={styles.statText}>
+                      {filteredStudents.length} Students
+                    </Text>
                   </View>
                 </View>
               </View>
             </View>
           )}
-          
+
           {/* Student Search */}
           <View style={styles.studentSearchContainer}>
             <View style={styles.studentSearchBar}>
-              <Feather name="search" size={20} color="#6c757d" style={styles.searchIcon} />
+              <Feather
+                name="search"
+                size={20}
+                color="#6c757d"
+                style={styles.searchIcon}
+              />
               <TextInput
                 style={styles.searchInput}
                 placeholder="Search students by name or email..."
@@ -494,35 +597,41 @@ const EmployerHomePage = () => {
                 placeholderTextColor="#6c757d"
               />
               {studentSearchQuery.length > 0 && (
-                <TouchableOpacity onPress={() => setStudentSearchQuery('')}>
+                <TouchableOpacity onPress={() => setStudentSearchQuery("")}>
                   <Feather name="x" size={20} color="#6c757d" />
                 </TouchableOpacity>
               )}
             </View>
           </View>
-          
+
           {/* Students List */}
           <View style={styles.studentsListContainer}>
             <View style={styles.listHeader}>
               <Text style={styles.listTitle}>Students</Text>
               <Text style={styles.listSubtitle}>
-                {filteredStudents.length} of {selectedCertificate?.students.length || 0} students
+                {filteredStudents.length} of {filteredStudents.length} students
               </Text>
             </View>
-            
+
             {filteredStudents.length > 0 ? (
               <FlatList
                 data={filteredStudents}
                 renderItem={renderStudentItem}
-                keyExtractor={item => item.id}
+                keyExtractor={(item) => item.id}
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={styles.studentsList}
               />
             ) : (
               <View style={styles.emptyState}>
-                <MaterialCommunityIcons name="account-search-outline" size={60} color="#d1d1d1" />
+                <MaterialCommunityIcons
+                  name="account-search-outline"
+                  size={60}
+                  color="#d1d1d1"
+                />
                 <Text style={styles.emptyStateText}>No students found</Text>
-                <Text style={styles.emptyStateSubtext}>Try adjusting your search</Text>
+                <Text style={styles.emptyStateSubtext}>
+                  Try adjusting your search
+                </Text>
               </View>
             )}
           </View>
@@ -808,7 +917,7 @@ const styles = StyleSheet.create({
     color: "#EF4637",
     fontWeight: "bold",
   },
-  
+
   // Modal Styles
   modalContainer: {
     flex: 1,
