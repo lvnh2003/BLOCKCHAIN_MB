@@ -17,18 +17,6 @@ import { useAuth } from "@/context/AuthContext";
 import { updateUser } from "@/apis/company/update-user";
 import { getUser } from "@/apis/company/get-user";
 
-// Sample user data
-// const userData: User = {
-//   code: "USR12345",
-//   password: "••••••••",
-//   role: "TEACHER",
-//   name: "Tools Lateef",
-//   id: "TL-2023-001",
-//   avatar:
-//     "https://img.tripi.vn/cdn-cgi/image/width=700,height=700/https://gcs.tripi.vn/public-tripi/tripi-feed/img/482740uFk/anh-mo-ta.png",
-//   birthdate: "15/04/1990",
-// };
-
 interface UserById {
   id: string;
   createdAt: number;
@@ -79,12 +67,17 @@ const ProfileScreen = () => {
     if (!result.canceled && result.assets.length > 0) {
       const selectedImage = result.assets[0].uri;
       setImage(selectedImage);
-      await uploadImage(selectedImage);
-      await updatedUser();
+      try {
+        const filePathImage = await uploadImage(selectedImage);
+        await updatedUser(filePathImage);
+      } catch (error) {
+        console.error("Failed to upload image or update user", error);
+      }
     }
   };
 
   const uploadImage = async (imageUri: string) => {
+    console.log(1);
     const formData = new FormData();
     formData.append("file", {
       uri: imageUri,
@@ -105,14 +98,15 @@ const ProfileScreen = () => {
       );
 
       const data = await response.json();
-      setFilePath(data.filePath);
       console.log("data ok", data);
+      setFilePath(data.filePath);
+      return data.filePath;
     } catch (error) {
       console.error("Upload failed", error);
     }
   };
 
-  const updatedUser = async () => {
+  const updatedUser = async (filePathImage: string) => {
     try {
       if (filePath.length > 0) {
         const response = await updateUser({
@@ -122,10 +116,11 @@ const ProfileScreen = () => {
             code: user?.code,
             password: user?.password,
             role: user?.role,
-            image: filePath,
+            image: filePathImage,
+            dateOfBirth: user?.dateOfBirth,
           },
         });
-        console.log(response);
+        console.log("update user succes", response);
         setCheckUpdate(!checkUpdate);
       }
     } catch (error) {
@@ -137,15 +132,18 @@ const ProfileScreen = () => {
     const fetchData = async () => {
       try {
         const response = await getUser(user?.id);
+        console.log("user data first", response);
         setDataUser(response);
       } catch (error) {
         console.log("fetch user data failed", error);
       }
     };
-    if (checkUpdate) {
-      fetchData();
-    }
-  }, [checkUpdate]);
+    fetchData();
+  }, [checkUpdate, filePath]);
+
+  useEffect(() => {
+    console.log("dataUser", dataUser?.image);
+  }, [dataUser]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -153,10 +151,17 @@ const ProfileScreen = () => {
         {/* Header Section */}
         <View style={styles.header}>
           <View style={styles.avatarContainer}>
-            {image && (
+            {image || dataUser?.image ? (
               <Image
                 source={{
                   uri: image || dataUser?.image,
+                }}
+                style={styles.avatar}
+              />
+            ) : (
+              <Image
+                source={{
+                  uri: "https://static.vecteezy.com/system/resources/previews/009/292/244/non_2x/default-avatar-icon-of-social-media-user-vector.jpg",
                 }}
                 style={styles.avatar}
               />

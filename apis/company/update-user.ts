@@ -22,7 +22,17 @@ export const updateUser = async ({
   id,
 }: UpdateUserArgs): Promise<UpdateUserResponse> => {
   try {
-    const response = await api.put(`users/${id}`, body);
+    const { code, name, password, role, dateOfBirth, image } = body;
+    console.log("image ", image);
+    const imageUpload = `http://192.168.2.6:3000${image}`;
+    const response = await api.put(`users/${id}`, {
+      code,
+      name,
+      password,
+      role,
+      dateOfBirth,
+      image: imageUpload,
+    });
 
     console.log("response data image", response.data);
 
