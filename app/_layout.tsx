@@ -15,6 +15,8 @@ function AuthRedirect() {
       } else if (user.role === "STUDENT") {
         router.replace("/(student)");
       } else if (user.role === "MASTER") {
+        router.replace("/(tabs)");
+      } else if (user.role === "COMPANY") {
         router.replace("/(company)");
       }
     } else {

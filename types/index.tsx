@@ -6,6 +6,7 @@ export interface User {
   id?: string;
   avatar?: string,
   birthdate?: string,
+  email?: string
 }
 
 export interface Teacher {

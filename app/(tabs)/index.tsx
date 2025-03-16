@@ -1,6 +1,6 @@
-import React from "react"
+"use client"
 
-import { useEffect, useState, useRef } from "react"
+import React, { useState, useRef, useEffect } from "react"
 import {
   View,
   StyleSheet,
@@ -11,7 +11,7 @@ import {
   ImageBackground,
   Animated,
   Platform,
-  RefreshControl, // Import RefreshControl
+  RefreshControl,
 } from "react-native"
 import { Text, Avatar, Searchbar, ActivityIndicator, Surface, IconButton, Divider } from "react-native-paper"
 import { SafeAreaView } from "react-native-safe-area-context"
@@ -22,8 +22,56 @@ import { LinearGradient } from "expo-linear-gradient"
 import { BlurView } from "expo-blur"
 import { MaterialCommunityIcons, MaterialIcons, Feather, AntDesign } from "@expo/vector-icons"
 import { PieChart } from "react-native-chart-kit"
+import StudentModal from "@/components/AddStudentModal"
+import TeacherModal from "@/components/AddTeacherModal"
+import CompanyModal from "@/components/AddCompanyModal"
+import CertificateModal from "@/components/AddCertificateModal"
+import ProfileModal from "@/components/EditProfileModal"
 
-const { width, height } = Dimensions.get("window")
+
+
+// User interfaces
+export interface User {
+  code: string
+  password?: string
+  role?: "STUDENT" | "TEACHER" | "MASTER"
+  name?: string
+  id?: string
+  avatar?: string
+  birthdate?: string
+}
+
+export interface Teacher {
+  id: string
+  name: string
+  teacherId: string
+  major: string
+  avatar: string
+}
+
+export interface Certificate {
+  id: string
+  createdAt: number
+  imageUrl?: string
+  description?: string
+  status?: "SIGNED" | "PENDING" | "APPROVED"
+  certificateType?: CertificateType
+  certId?: string
+}
+
+export interface CertificateType {
+  id?: string
+  name: string
+}
+
+export interface Student {
+  id: string
+  name: string
+  score: number
+  status: "pending" | "signed"
+}
+
+const { width } = Dimensions.get("window")
 const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView)
 
 // Mock data for admin dashboard
@@ -51,13 +99,39 @@ const mockData = {
     signed: 742,
     pending: 134,
   },
-  monthlyStats: {
-    labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
-    students: [30, 45, 28, 80, 99, 43],
-    teachers: [5, 8, 12, 15, 20, 25],
-    certificates: [20, 35, 40, 55, 82, 120],
-  },
 }
+
+// Quick actions for the modal
+const quickActions = [
+  {
+    id: "student",
+    title: "Add Student",
+    icon: "person-add",
+    color: "#1976D2",
+    iconType: "material",
+  },
+  {
+    id: "teacher",
+    title: "Add Teacher",
+    icon: "person-add",
+    color: "#4CAF50",
+    iconType: "material",
+  },
+  {
+    id: "company",
+    title: "Add Company",
+    icon: "business",
+    color: "#9C27B0",
+    iconType: "material",
+  },
+  {
+    id: "certificate",
+    title: "Issue Certificate",
+    icon: "certificate",
+    color: "#FF9800",
+    iconType: "materialCommunity",
+  },
+]
 
 export default function AdminDashboard() {
   const { user, logout } = useAuth()
@@ -67,24 +141,17 @@ export default function AdminDashboard() {
   const [showSearchBar, setShowSearchBar] = useState(false)
   const scrollY = useRef(new Animated.Value(0)).current
 
-  // Animation values
-  const headerHeight = scrollY.interpolate({
-    inputRange: [0, 100],
-    outputRange: [200, 120],
-    extrapolate: "clamp",
-  })
+  // Modal states
+  const [activeModal, setActiveModal] = useState<string | null>(null)
 
-  const headerOpacity = scrollY.interpolate({
-    inputRange: [0, 60, 90],
-    outputRange: [1, 0.3, 0],
-    extrapolate: "clamp",
-  })
-
-  const headerTitleOpacity = scrollY.interpolate({
-    inputRange: [0, 60, 90],
-    outputRange: [0, 0.5, 1],
-    extrapolate: "clamp",
-  })
+  // Profile form initial data
+  const profileInitialData = {
+    name: user?.name || "Admin User",
+    email: user?.email || "admin@example.com",
+    role: "Administrator",
+    darkMode: false,
+    notifications: true,
+  }
 
   useEffect(() => {
     // Simulate data loading
@@ -119,6 +186,64 @@ export default function AdminDashboard() {
         return <MaterialIcons name="info" size={24} color="#1976D2" />
     }
   }
+
+  // Handle form submissions
+  const handleStudentSubmit = (data: any) => {
+    console.log("Student form submitted:", data)
+    alert("Student added successfully!")
+    setActiveModal(null)
+  }
+
+  const handleTeacherSubmit = (data: any) => {
+    console.log("Teacher form submitted:", data)
+    alert("Teacher added successfully!")
+    setActiveModal(null)
+  }
+
+  const handleCompanySubmit = (data: any) => {
+    console.log("Company form submitted:", data)
+    alert("Company added successfully!")
+    setActiveModal(null)
+  }
+
+  const handleCertificateSubmit = (data: any) => {
+    console.log("Certificate form submitted:", data)
+    alert("Certificate issued successfully!")
+    setActiveModal(null)
+  }
+
+  const handleProfileSubmit = (data: any) => {
+    console.log("Profile form submitted:", data)
+    alert("Profile updated successfully!")
+    setActiveModal(null)
+  }
+
+  const handleLogout = () => {
+    router.replace("/login")
+  }
+
+  const handleQuickActionSelect = (actionId: string) => {
+    setActiveModal(actionId)
+  }
+
+  // Animation values
+  const headerHeight = scrollY.interpolate({
+    inputRange: [0, 100],
+    outputRange: [200, 120],
+    extrapolate: "clamp",
+  })
+
+  const headerOpacity = scrollY.interpolate({
+    inputRange: [0, 60, 90],
+    outputRange: [1, 0.3, 0],
+    extrapolate: "clamp",
+  })
+
+  const headerTitleOpacity = scrollY.interpolate({
+    inputRange: [0, 60, 90],
+    outputRange: [0, 0.5, 1],
+    extrapolate: "clamp",
+  })
 
   if (loading && !refreshing) {
     return (
@@ -159,10 +284,10 @@ export default function AdminDashboard() {
                   style={styles.headerActionButton}
                 />
                 <IconButton
-                  icon="logout"
+                  icon="account-cog"
                   iconColor="#fff"
                   size={24}
-                  onPress={() => router.replace("/login")}
+                  onPress={() => setActiveModal("profile")}
                   style={styles.headerActionButton}
                 />
               </View>
@@ -180,8 +305,8 @@ export default function AdminDashboard() {
                   <TouchableOpacity style={styles.headerActionButton} onPress={toggleSearchBar}>
                     <Feather name="search" size={22} color="#fff" />
                   </TouchableOpacity>
-                  <TouchableOpacity style={styles.headerActionButton} onPress={() => router.replace("/login")}>
-                    <Feather name="log-out" size={22} color="#fff" />
+                  <TouchableOpacity style={styles.headerActionButton} onPress={() => setActiveModal("profile")}>
+                    <Feather name="settings" size={22} color="#fff" />
                   </TouchableOpacity>
                   <Avatar.Image size={50} source={{ uri: "https://i.pravatar.cc/300?img=68" }} style={styles.avatar} />
                 </View>
@@ -354,46 +479,76 @@ export default function AdminDashboard() {
           </View>
 
           <View style={styles.quickActionsGrid}>
-            <TouchableOpacity style={styles.quickActionCard}>
-              <View style={[styles.quickActionIcon, { backgroundColor: "#1976D2" }]}>
+            <TouchableOpacity style={styles.quickActionCard} onPress={() => setActiveModal("student")}>
+              <LinearGradient
+                colors={["#1976D2", "#1565C0"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.quickActionGradient}
+              >
                 <MaterialIcons name="person-add" size={24} color="#fff" />
-              </View>
+              </LinearGradient>
               <Text style={styles.quickActionText}>Add Student</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.quickActionCard}>
-              <View style={[styles.quickActionIcon, { backgroundColor: "#4CAF50" }]}>
+            <TouchableOpacity style={styles.quickActionCard} onPress={() => setActiveModal("teacher")}>
+              <LinearGradient
+                colors={["#4CAF50", "#388E3C"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.quickActionGradient}
+              >
                 <MaterialIcons name="person-add" size={24} color="#fff" />
-              </View>
+              </LinearGradient>
               <Text style={styles.quickActionText}>Add Teacher</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.quickActionCard}>
-              <View style={[styles.quickActionIcon, { backgroundColor: "#9C27B0" }]}>
+            <TouchableOpacity style={styles.quickActionCard} onPress={() => setActiveModal("company")}>
+              <LinearGradient
+                colors={["#9C27B0", "#7B1FA2"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.quickActionGradient}
+              >
                 <MaterialIcons name="business" size={24} color="#fff" />
-              </View>
+              </LinearGradient>
               <Text style={styles.quickActionText}>Add Company</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.quickActionCard}>
-              <View style={[styles.quickActionIcon, { backgroundColor: "#FF9800" }]}>
+            <TouchableOpacity style={styles.quickActionCard} onPress={() => setActiveModal("certificate")}>
+              <LinearGradient
+                colors={["#FF9800", "#F57C00"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.quickActionGradient}
+              >
                 <MaterialCommunityIcons name="certificate" size={24} color="#fff" />
-              </View>
+              </LinearGradient>
               <Text style={styles.quickActionText}>Issue Certificate</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.quickActionCard}>
-              <View style={[styles.quickActionIcon, { backgroundColor: "#607D8B" }]}>
+            <TouchableOpacity style={styles.quickActionCard} onPress={() => setActiveModal("profile")}>
+              <LinearGradient
+                colors={["#607D8B", "#455A64"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.quickActionGradient}
+              >
                 <MaterialIcons name="settings" size={24} color="#fff" />
-              </View>
+              </LinearGradient>
               <Text style={styles.quickActionText}>Settings</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.quickActionCard}>
-              <View style={[styles.quickActionIcon, { backgroundColor: "#E91E63" }]}>
-                <MaterialIcons name="help" size={24} color="#fff" />
-              </View>
-              <Text style={styles.quickActionText}>Help</Text>
+            <TouchableOpacity style={styles.quickActionCard} onPress={() => router.push("/(tabs)/teachers")}>
+              <LinearGradient
+                colors={["#374785", "#24306e"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.quickActionGradient}
+              >
+                <MaterialIcons name="people" size={24} color="#fff" />
+              </LinearGradient>
+              <Text style={styles.quickActionText}>Manage Users</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -401,6 +556,39 @@ export default function AdminDashboard() {
         {/* Bottom padding */}
         <View style={styles.bottomPadding} />
       </AnimatedScrollView>
+
+      {/* Modals */}
+      <StudentModal
+        visible={activeModal === "student"}
+        onClose={() => setActiveModal(null)}
+        onSubmit={handleStudentSubmit}
+      />
+
+      <TeacherModal
+        visible={activeModal === "teacher"}
+        onClose={() => setActiveModal(null)}
+        onSubmit={handleTeacherSubmit}
+      />
+
+      <CompanyModal
+        visible={activeModal === "company"}
+        onClose={() => setActiveModal(null)}
+        onSubmit={handleCompanySubmit}
+      />
+
+      <CertificateModal
+        visible={activeModal === "certificate"}
+        onClose={() => setActiveModal(null)}
+        onSubmit={handleCertificateSubmit}
+      />
+
+      <ProfileModal
+        visible={activeModal === "profile"}
+        onClose={() => setActiveModal(null)}
+        onSubmit={handleProfileSubmit}
+        onLogout={handleLogout}
+        initialData={profileInitialData}
+      />
     </SafeAreaView>
   )
 }
@@ -532,105 +720,39 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     justifyContent: "space-between",
   },
-  statsCard: {
+  simpleStatsCard: {
     width: "48%",
     borderRadius: 16,
     overflow: "hidden",
     elevation: 4,
     marginBottom: 16,
+    backgroundColor: "#fff",
   },
-  statsCardGradient: {
-    borderRadius: 16,
+  simpleStatsContent: {
     padding: 16,
-  },
-  statsCardHeader: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 12,
   },
-  statsIconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
+  simpleStatsIcon: {
+    width: 56,
+    height: 56,
+    borderRadius: 16,
     justifyContent: "center",
     alignItems: "center",
+    marginRight: 16,
   },
-  studentsIconContainer: {
-    backgroundColor: "#1976D2",
+  simpleStatsTextContainer: {
+    flex: 1,
   },
-  teachersIconContainer: {
-    backgroundColor: "#4CAF50",
-  },
-  companiesIconContainer: {
-    backgroundColor: "#9C27B0",
-  },
-  certificatesIconContainer: {
-    backgroundColor: "#FF9800",
-  },
-  statsHeaderRight: {
-    alignItems: "flex-end",
-  },
-  statsGrowth: {
-    fontSize: 12,
-    fontWeight: "500",
-    color: "#4CAF50",
-  },
-  statsNumber: {
+  simpleStatsNumber: {
     fontSize: 24,
     fontWeight: "bold",
     color: "#333",
     marginBottom: 4,
   },
-  statsTitle: {
+  simpleStatsTitle: {
     fontSize: 14,
     color: "#666",
-    marginBottom: 16,
-  },
-  statsDetails: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 16,
-  },
-  statsDetailItem: {
-    flex: 1,
-    alignItems: "center",
-  },
-  statsDetailDivider: {
-    width: 1,
-    height: "100%",
-    backgroundColor: "#eee",
-  },
-  statsDetailValue: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#333",
-    marginBottom: 4,
-  },
-  statsDetailLabel: {
-    fontSize: 12,
-    color: "#666",
-  },
-  statsProgressContainer: {
-    marginTop: 4,
-  },
-  statsProgressLabels: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 4,
-  },
-  statsProgressLabel: {
-    fontSize: 12,
-    color: "#666",
-  },
-  statsProgressValue: {
-    fontSize: 12,
-    fontWeight: "bold",
-    color: "#333",
-  },
-  statsProgress: {
-    height: 6,
-    borderRadius: 3,
   },
   sectionHeader: {
     flexDirection: "row",
@@ -674,6 +796,7 @@ const styles = StyleSheet.create({
     elevation: 4,
     marginBottom: 16,
     padding: 16,
+    backgroundColor: "#fff",
   },
   chartCardHeader: {
     flexDirection: "row",
@@ -686,48 +809,40 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#333",
   },
-  chartLegend: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  legendItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginLeft: 12,
-  },
-  legendColor: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    marginRight: 4,
-  },
-  legendText: {
-    fontSize: 12,
-    color: "#666",
-  },
-  chartScrollView: {
-    marginHorizontal: -16,
-  },
-  chart: {
-    marginHorizontal: 16,
-    borderRadius: 16,
-  },
-  chartAction: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "rgba(55, 71, 133, 0.1)",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
-  },
-  chartActionText: {
-    color: "#374785",
-    fontSize: 12,
-    fontWeight: "500",
-    marginRight: 4,
-  },
   pieChartContainer: {
     alignItems: "center",
+  },
+  certificateStatusSummary: {
+    marginTop: 20,
+    paddingHorizontal: 16,
+  },
+  statusItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  statusDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    marginRight: 8,
+  },
+  statusLabel: {
+    fontSize: 16,
+    fontWeight: "500",
+    color: "#333",
+    marginRight: 8,
+    width: 70,
+  },
+  statusValue: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#333",
+    marginRight: 8,
+  },
+  statusPercent: {
+    fontSize: 14,
+    color: "#666",
   },
   activitySection: {
     marginBottom: 20,
@@ -737,6 +852,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     elevation: 4,
     padding: 16,
+    backgroundColor: "#fff",
   },
   activityItem: {
     flexDirection: "row",
@@ -789,7 +905,7 @@ const styles = StyleSheet.create({
     elevation: 2,
     marginBottom: 12,
   },
-  quickActionIcon: {
+  quickActionGradient: {
     width: 50,
     height: 50,
     borderRadius: 25,
@@ -821,72 +937,6 @@ const styles = StyleSheet.create({
   },
   bottomPadding: {
     height: 80,
-  },
-  simpleStatsCard: {
-    width: "48%",
-    borderRadius: 16,
-    overflow: "hidden",
-    elevation: 4,
-    marginBottom: 16,
-    backgroundColor: "#fff",
-  },
-  simpleStatsContent: {
-    padding: 16,
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  simpleStatsIcon: {
-    width: 56,
-    height: 56,
-    borderRadius: 16,
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 16,
-  },
-  simpleStatsTextContainer: {
-    flex: 1,
-  },
-  simpleStatsNumber: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#333",
-    marginBottom: 4,
-  },
-  simpleStatsTitle: {
-    fontSize: 14,
-    color: "#666",
-  },
-  certificateStatusSummary: {
-    marginTop: 20,
-    paddingHorizontal: 16,
-  },
-  statusItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  statusDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    marginRight: 8,
-  },
-  statusLabel: {
-    fontSize: 16,
-    fontWeight: "500",
-    color: "#333",
-    marginRight: 8,
-    width: 70,
-  },
-  statusValue: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#333",
-    marginRight: 8,
-  },
-  statusPercent: {
-    fontSize: 14,
-    color: "#666",
   },
 })
 
