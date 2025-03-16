@@ -20,8 +20,7 @@ import {
 
 interface CompanyFormData {
   name: string;
-  email: string;
-  industry?: string;
+  code: string
 }
 
 interface CompanyModalProps {
@@ -35,16 +34,10 @@ const { height } = Dimensions.get("window");
 const CompanyModal: React.FC<CompanyModalProps> = ({ visible, onClose, onSubmit }) => {
   const [formData, setFormData] = useState<CompanyFormData>({
     name: "",
-    email: "",
-    industry: "",
+    code: "",
   });
   
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-
-  const validateEmail = (email: string): boolean => {
-    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return re.test(String(email).toLowerCase());
-  };
 
   const handleSubmit = () => {
     const errors: Record<string, string> = {};
@@ -53,10 +46,8 @@ const CompanyModal: React.FC<CompanyModalProps> = ({ visible, onClose, onSubmit 
       errors.name = "Company name is required";
     }
     
-    if (!formData.email) {
-      errors.email = "Email is required";
-    } else if (!validateEmail(formData.email)) {
-      errors.email = "Invalid email format";
+    if (!formData.code) {
+      errors.code = "code is required";
     }
     
     setFormErrors(errors);
@@ -100,27 +91,16 @@ const CompanyModal: React.FC<CompanyModalProps> = ({ visible, onClose, onSubmit 
               {formErrors.name && <HelperText type="error">{formErrors.name}</HelperText>}
 
               <TextInput
-                label="Email"
-                placeholder="Enter company email"
-                value={formData.email}
-                onChangeText={(text) => setFormData({ ...formData, email: text })}
+                label="Code"
+                placeholder="Enter company code"
+                value={formData.code}
+                onChangeText={(text) => setFormData({ ...formData, code: text })}
                 style={styles.input}
                 mode="outlined"
-                keyboardType="email-address"
-                error={!!formErrors.email}
-                left={<TextInput.Icon icon="email" />}
+                error={!!formErrors.code}
+                left={<TextInput.Icon icon="account" />}
               />
-              {formErrors.email && <HelperText type="error">{formErrors.email}</HelperText>}
-
-              <TextInput
-                label="Industry"
-                placeholder="Enter company industry"
-                value={formData.industry}
-                onChangeText={(text) => setFormData({ ...formData, industry: text })}
-                style={styles.input}
-                mode="outlined"
-                left={<TextInput.Icon icon="office-building" />}
-              />
+              {formErrors.code && <HelperText type="error">{formErrors.code}</HelperText>}
 
               <View style={styles.formActions}>
                 <Button

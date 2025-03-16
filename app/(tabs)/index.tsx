@@ -27,54 +27,18 @@ import TeacherModal from "@/components/AddTeacherModal"
 import CompanyModal from "@/components/AddCompanyModal"
 import CertificateModal from "@/components/AddCertificateModal"
 import ProfileModal from "@/components/EditProfileModal"
+import { getAllUsers } from "@/utils/admin/getAllUsers"
+import { Certificate, User } from "@/types"
+import { createCertificate } from "@/utils/admin/createCertificate"
+import Toast from "react-native-toast-message"
+import { getAllCertificatesAdmin } from "@/utils/admin/getAllCertificate"
+import { createUser } from "@/utils/admin/createUser"
 
-
-
-// User interfaces
-export interface User {
-  code: string
-  password?: string
-  role?: "STUDENT" | "TEACHER" | "MASTER"
-  name?: string
-  id?: string
-  avatar?: string
-  birthdate?: string
-}
-
-export interface Teacher {
-  id: string
-  name: string
-  teacherId: string
-  major: string
-  avatar: string
-}
-
-export interface Certificate {
-  id: string
-  createdAt: number
-  imageUrl?: string
-  description?: string
-  status?: "SIGNED" | "PENDING" | "APPROVED"
-  certificateType?: CertificateType
-  certId?: string
-}
-
-export interface CertificateType {
-  id?: string
-  name: string
-}
-
-export interface Student {
-  id: string
-  name: string
-  score: number
-  status: "pending" | "signed"
-}
 
 const { width } = Dimensions.get("window")
 const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView)
 
-// Mock data for admin dashboard
+
 const mockData = {
   students: {
     total: 1248,
@@ -100,39 +64,6 @@ const mockData = {
     pending: 134,
   },
 }
-
-// Quick actions for the modal
-const quickActions = [
-  {
-    id: "student",
-    title: "Add Student",
-    icon: "person-add",
-    color: "#1976D2",
-    iconType: "material",
-  },
-  {
-    id: "teacher",
-    title: "Add Teacher",
-    icon: "person-add",
-    color: "#4CAF50",
-    iconType: "material",
-  },
-  {
-    id: "company",
-    title: "Add Company",
-    icon: "business",
-    color: "#9C27B0",
-    iconType: "material",
-  },
-  {
-    id: "certificate",
-    title: "Issue Certificate",
-    icon: "certificate",
-    color: "#FF9800",
-    iconType: "materialCommunity",
-  },
-]
-
 export default function AdminDashboard() {
   const { user, logout } = useAuth()
   const router = useRouter()
@@ -140,7 +71,24 @@ export default function AdminDashboard() {
   const [refreshing, setRefreshing] = useState(false)
   const [showSearchBar, setShowSearchBar] = useState(false)
   const scrollY = useRef(new Animated.Value(0)).current
+  const [usersData,setUsersData] = useState<User[]>();
+  const [certificates, setCertificates] = useState<Certificate[]>();
+useEffect(()=>{
+  const fetchData = async () =>{
+    const data = await getAllUsers()
+    setUsersData(data);
 
+    const certificatesData = await getAllCertificatesAdmin();
+    setCertificates(certificatesData);
+  }
+  fetchData();
+  
+},[usersData])
+
+const totalStudents = usersData?.filter(s => s.role === "STUDENT").length;
+const totalTeachers = usersData?.filter(s => s.role === "TEACHER").length;
+const totalCompanies= usersData?.filter(s => s.role === "COMPANY").length;
+const totalCertificate = certificates?.length;
   // Modal states
   const [activeModal, setActiveModal] = useState<string | null>(null)
 
@@ -188,27 +136,23 @@ export default function AdminDashboard() {
   }
 
   // Handle form submissions
-  const handleStudentSubmit = (data: any) => {
-    console.log("Student form submitted:", data)
-    alert("Student added successfully!")
+  const handleStudentSubmit = async (data: any) => {
+    await createUser(data.name, data.code, "STUDENT");
     setActiveModal(null)
   }
 
-  const handleTeacherSubmit = (data: any) => {
-    console.log("Teacher form submitted:", data)
-    alert("Teacher added successfully!")
+  const handleTeacherSubmit =async (data: any) => {
+    await createUser(data.name, data.code, "TEACHER");
     setActiveModal(null)
   }
 
-  const handleCompanySubmit = (data: any) => {
-    console.log("Company form submitted:", data)
-    alert("Company added successfully!")
+  const handleCompanySubmit =async (data: any) => {
+    await createUser(data.name, data.code, "COMPANY");
     setActiveModal(null)
   }
 
-  const handleCertificateSubmit = (data: any) => {
-    console.log("Certificate form submitted:", data)
-    alert("Certificate issued successfully!")
+  const handleCertificateSubmit = async (data: any) => {
+    await createCertificate(data.name);
     setActiveModal(null)
   }
 
@@ -354,7 +298,7 @@ export default function AdminDashboard() {
                 <MaterialIcons name="people" size={28} color="#fff" />
               </View>
               <View style={styles.simpleStatsTextContainer}>
-                <Text style={styles.simpleStatsNumber}>{mockData.students.total.toLocaleString()}</Text>
+                <Text style={styles.simpleStatsNumber}>{totalStudents}</Text>
                 <Text style={styles.simpleStatsTitle}>Students</Text>
               </View>
             </View>
@@ -367,7 +311,7 @@ export default function AdminDashboard() {
                 <MaterialIcons name="school" size={28} color="#fff" />
               </View>
               <View style={styles.simpleStatsTextContainer}>
-                <Text style={styles.simpleStatsNumber}>{mockData.teachers.total.toLocaleString()}</Text>
+                <Text style={styles.simpleStatsNumber}>{totalTeachers}</Text>
                 <Text style={styles.simpleStatsTitle}>Teachers</Text>
               </View>
             </View>
@@ -380,7 +324,7 @@ export default function AdminDashboard() {
                 <MaterialIcons name="business" size={28} color="#fff" />
               </View>
               <View style={styles.simpleStatsTextContainer}>
-                <Text style={styles.simpleStatsNumber}>{mockData.companies.total.toLocaleString()}</Text>
+                <Text style={styles.simpleStatsNumber}>{totalCompanies}</Text>
                 <Text style={styles.simpleStatsTitle}>Companies</Text>
               </View>
             </View>
@@ -393,7 +337,7 @@ export default function AdminDashboard() {
                 <MaterialCommunityIcons name="certificate" size={28} color="#fff" />
               </View>
               <View style={styles.simpleStatsTextContainer}>
-                <Text style={styles.simpleStatsNumber}>{mockData.certificates.total.toLocaleString()}</Text>
+                <Text style={styles.simpleStatsNumber}>{totalCertificate}</Text>
                 <Text style={styles.simpleStatsTitle}>Certificates</Text>
               </View>
             </View>

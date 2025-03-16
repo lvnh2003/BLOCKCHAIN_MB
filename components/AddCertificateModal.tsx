@@ -21,10 +21,10 @@ import {
 
 interface CertificateFormData {
   name: string;
-  issuedTo: string;
-  createdAt: number;
-  description?: string;
-  status: "PENDING" | "SIGNED" | "APPROVED";
+  // issuedTo: string;
+  // createdAt: number;
+  // description?: string;
+  // status: "PENDING" | "SIGNED" | "APPROVED";
 }
 
 interface CertificateModalProps {
@@ -38,10 +38,10 @@ const { height } = Dimensions.get("window");
 const CertificateModal: React.FC<CertificateModalProps> = ({ visible, onClose, onSubmit }) => {
   const [formData, setFormData] = useState<CertificateFormData>({
     name: "",
-    issuedTo: "",
-    createdAt: Date.now(),
-    description: "",
-    status: "PENDING",
+    // issuedTo: "",
+    // createdAt: Date.now(),
+    // description: "",
+    // status: "PENDING",
   });
   
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
@@ -52,10 +52,6 @@ const CertificateModal: React.FC<CertificateModalProps> = ({ visible, onClose, o
     
     if (!formData.name) {
       errors.name = "Certificate name is required";
-    }
-    
-    if (!formData.issuedTo) {
-      errors.issuedTo = "Recipient is required";
     }
     
     setFormErrors(errors);
@@ -73,12 +69,12 @@ const CertificateModal: React.FC<CertificateModalProps> = ({ visible, onClose, o
     });
   };
 
-  const onDateChange = (_: any, selectedDate?: Date) => {
-    setShowDatePicker(false);
-    if (selectedDate) {
-      setFormData({ ...formData, createdAt: selectedDate.getTime() });
-    }
-  };
+  // const onDateChange = (_: any, selectedDate?: Date) => {
+  //   setShowDatePicker(false);
+  //   if (selectedDate) {
+  //     setFormData({ ...formData, createdAt: selectedDate.getTime() });
+  //   }
+  // };
 
   return (
     <Modal
@@ -113,7 +109,7 @@ const CertificateModal: React.FC<CertificateModalProps> = ({ visible, onClose, o
               />
               {formErrors.name && <HelperText type="error">{formErrors.name}</HelperText>}
 
-              <TextInput
+              {/* <TextInput
                 label="Issued To (Student Code)"
                 placeholder="Enter student code"
                 value={formData.issuedTo}
@@ -192,7 +188,7 @@ const CertificateModal: React.FC<CertificateModalProps> = ({ visible, onClose, o
                     ]}>Approved</Text>
                   </TouchableOpacity>
                 </View>
-              </View>
+              </View> */}
 
               <View style={styles.formActions}>
                 <Button

@@ -22,8 +22,6 @@ import {
 interface TeacherFormData {
   name: string;
   code: string;
-  birthdate: string;
-  major?: string;
 }
 
 interface TeacherModalProps {
@@ -38,8 +36,6 @@ const TeacherModal: React.FC<TeacherModalProps> = ({ visible, onClose, onSubmit 
   const [formData, setFormData] = useState<TeacherFormData>({
     name: "",
     code: "",
-    birthdate: new Date().toISOString().split("T")[0],
-    major: "",
   });
   
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
@@ -71,13 +67,7 @@ const TeacherModal: React.FC<TeacherModalProps> = ({ visible, onClose, onSubmit 
     });
   };
 
-  const onDateChange = (_: any, selectedDate?: Date) => {
-    setShowDatePicker(false);
-    if (selectedDate) {
-      const isoDate = selectedDate.toISOString().split("T")[0];
-      setFormData({ ...formData, birthdate: isoDate });
-    }
-  };
+
 
   return (
     <Modal
@@ -124,30 +114,6 @@ const TeacherModal: React.FC<TeacherModalProps> = ({ visible, onClose, onSubmit 
               />
               {formErrors.code && <HelperText type="error">{formErrors.code}</HelperText>}
 
-              <TouchableOpacity
-                style={styles.datePickerButton}
-                onPress={() => setShowDatePicker(true)}
-              >
-                <TextInput
-                  label="Date of Birth"
-                  value={formData.birthdate ? formatDate(new Date(formData.birthdate)) : ""}
-                  style={styles.input}
-                  mode="outlined"
-                  editable={false}
-                  left={<TextInput.Icon icon="calendar" />}
-                  right={<TextInput.Icon icon="chevron-down" />}
-                />
-              </TouchableOpacity>
-
-              <TextInput
-                label="Major"
-                placeholder="Enter teacher's major"
-                value={formData.major}
-                onChangeText={(text) => setFormData({ ...formData, major: text })}
-                style={styles.input}
-                mode="outlined"
-                left={<TextInput.Icon icon="school" />}
-              />
 
               <View style={styles.formActions}>
                 <Button
