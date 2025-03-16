@@ -16,7 +16,7 @@ const { width } = Dimensions.get('window');
 export default function CertificateImage({ 
   issueDate, 
   recipientName,
-  description = "Congratulations, for your great performance shown during this month.\nWe really appreciate with your contributions.",
+  description = "Congratulations, for your great performance shown during this month.",
   style
 }: CertificateImageProps) {
   return (

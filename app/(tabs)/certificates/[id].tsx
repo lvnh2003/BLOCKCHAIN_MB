@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, StyleSheet, ScrollView, ImageBackground } from 'react-native';
 import { Text, Button, Chip } from 'react-native-paper';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -7,18 +7,21 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { Certificate } from '../../../types';
 import CertificateImage from '@/components/CertificateImage';
+import { getCertificateById } from '@/utils/student/getCertificateById';
 
-const certificateData: Certificate = {
-  id: '1',
-  name: 'Advanced UI/UX Design',
-  issueDate: '2024-03-10',
-  imageUrl: 'https://images.unsplash.com/photo-1545235617-7a424c1a60cc?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-  description: 'Master the art of creating intuitive and beautiful user interfaces. This comprehensive course covers everything from user research and wireframing to high-fidelity prototypes and usability testing.',
-};
 
 export default function CertificateDetail() {
   const router = useRouter();
-  const certificate = certificateData; // In a real app, fetch the certificate based on the id
+  const params = useLocalSearchParams()
+  useEffect(() => {
+     const fetchReturnValue = async () => {
+       const certificateData: any =  await getCertificateById(Array.isArray(params?.id) ? params.id[0] : params?.id);
+       console.log(certificateData);
+     };
+     fetchReturnValue();
+   }, []);
+    
+   const certificate: Certificate = JSON.parse(params.certificate as string)
 
   return (
     <SafeAreaView style={styles.container}>
@@ -39,33 +42,18 @@ export default function CertificateDetail() {
             >
               Back
             </Button>
-            <Text style={styles.headerIcon}>{certificate.icon}</Text>
             <Text style={styles.headerTitle}>{certificate.name}</Text>
           </LinearGradient>
         </ImageBackground>
 
         <View style={styles.content}>
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Your Certificate</Text>
+            <Text style={styles.sectionTitle}>This is the format of certificate</Text>
             <CertificateImage
-                          issueDate={certificate.issueDate}
+                          issueDate={"2025-03-10"}
                           description={certificate.description}
-                          recipientName=''          
+                          recipientName={certificate.name}          
               />
-          </View>
-
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Description</Text>
-            <Text style={styles.description}>{certificate.description}</Text>
-          </View>
-
-
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Certificate Details</Text>
-            <View style={styles.detailRow}>
-              <Ionicons name="calendar-outline" size={20} color="#000" />
-              <Text style={styles.detailText}>Issued on: {certificate.issueDate}</Text>
-            </View>
           </View>
 
           <Button 

@@ -1,68 +1,61 @@
-// app/(app)/certificates/index.tsx
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, FlatList, TouchableOpacity, ImageBackground } from 'react-native';
-import { Text, Avatar, Chip } from 'react-native-paper';
+import { Text } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Certificate } from '../../../types';
 import { Ionicons } from '@expo/vector-icons';
+import { getAllCertificatesAdmin } from '@/utils/admin/getAllCertificate';
 
-const certificatesData: Certificate[] = [
-  {
-    id: '1',
-    name: 'Advanced UI/UX Design',
-    progress: 0.75,
-    icon: '🎨',
-    issueDate: '2024-03-10',
-    imageUrl: 'https://images.unsplash.com/photo-1545235617-7a424c1a60cc?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-    description: 'Master the art of creating intuitive and beautiful user interfaces.',
-  },
-  {
-    id: '2',
-    name: 'Full Stack Web Development',
-    progress: 0.50,
-    icon: '💻',
-    issueDate: '2024-04-15',
-    imageUrl: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-    description: 'Comprehensive training in both front-end and back-end web technologies.',
-  },
-  {
-    id: '3',
-    name: 'Data Science Fundamentals',
-    progress: 0.25,
-    icon: '📊',
-    issueDate: '2024-05-20',
-    imageUrl: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-    description: 'Learn the basics of data analysis, machine learning, and statistical modeling.',
-  },
+const randomImages = [
+  'https://images.unsplash.com/photo-1545235617-7a424c1a60cc?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+  'https://images.unsplash.com/photo-1498050108023-c5249f4df085?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+  'https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
 ];
 
+
 export default function Certificates() {
+  const [certificates, setCertificates] = useState<Certificate[]>([]);
   const router = useRouter();
 
-  const renderItem = ({ item }: { item: Certificate }) => (
-    <TouchableOpacity 
-      style={styles.cardContainer}
-      onPress={() => router.push(`/certificates/${item.id}`)}
-    >
-      <ImageBackground 
-        source={{ uri: item.imageUrl }} 
-        style={styles.cardBackground}
-        imageStyle={styles.cardImage}
+  useEffect(() => {
+    async function fetchData() {
+      const data = await getAllCertificatesAdmin();
+      setCertificates(data);
+    }
+    fetchData();
+  }, []);
+
+  const renderItem = ({ item }: { item: Certificate }) => {
+    const imageUrl = item.imageUrl || randomImages[Math.floor(Math.random() * randomImages.length)];
+    return (
+      <TouchableOpacity 
+        style={styles.cardContainer}
+        onPress={() => {
+          router.push({
+            pathname: "/certificates/[id]",
+            params: { id: item.id, certificate: JSON.stringify(item) },
+          });
+        }}
       >
-        <LinearGradient
-          colors={['rgba(0,0,0,0.1)', 'rgba(0,0,0,0.8)']}
-          style={styles.cardContent}
+        <ImageBackground 
+          source={{ uri: imageUrl }} 
+          style={styles.cardBackground}
+          imageStyle={styles.cardImage}
         >
-          <View style={styles.cardHeader}>
-            <Text style={styles.cardIcon}>{item.icon}</Text>
-            <Text style={styles.cardTitle}>{item.name}</Text>
-          </View>
-        </LinearGradient>
-      </ImageBackground>
-    </TouchableOpacity>
-  );
+          <LinearGradient
+            colors={['rgba(0,0,0,0.1)', 'rgba(0,0,0,0.8)']}
+            style={styles.cardContent}
+          >
+            <View style={styles.cardHeader}>
+              <Text style={styles.cardTitle}>{item.name}</Text>
+            </View>
+          </LinearGradient>
+        </ImageBackground>
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -73,7 +66,7 @@ export default function Certificates() {
         </TouchableOpacity>
       </View>
       <FlatList
-        data={certificatesData}
+        data={certificates}
         renderItem={renderItem}
         keyExtractor={item => item.id}
         contentContainerStyle={styles.list}
@@ -136,35 +129,5 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#fff',
     flex: 1,
-  },
-  cardFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-end',
-  },
-  cardIssuer: {
-    fontSize: 14,
-    color: '#fff',
-    opacity: 0.8,
-  },
-  progressContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.3)',
-    borderRadius: 10,
-    height: 20,
-    width: 100,
-    overflow: 'hidden',
-  },
-  progressBar: {
-    height: '100%',
-    backgroundColor: '#2ecc71',
-  },
-  progressText: {
-    position: 'absolute',
-    right: 5,
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: 'bold',
   },
 });

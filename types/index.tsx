@@ -25,6 +25,7 @@ export interface Certificate {
   status?: "SIGNED" | "PENDING" | "APPROVED";
   certificateType? : CertificateType;
   certId? : string;
+  name?: string
 }
 export interface CertificateType{
   id?: string;
