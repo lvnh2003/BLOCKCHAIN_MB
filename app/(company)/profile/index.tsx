@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
   View,
@@ -15,22 +15,37 @@ import * as ImagePicker from "expo-image-picker";
 import { User } from "@/types";
 import { useAuth } from "@/context/AuthContext";
 import { updateUser } from "@/apis/company/update-user";
+import { getUser } from "@/apis/company/get-user";
 
 // Sample user data
-const userData: User = {
-  code: "USR12345",
-  password: "••••••••",
-  role: "TEACHER",
-  name: "Tools Lateef",
-  id: "TL-2023-001",
-  avatar:
-    "https://img.tripi.vn/cdn-cgi/image/width=700,height=700/https://gcs.tripi.vn/public-tripi/tripi-feed/img/482740uFk/anh-mo-ta.png",
-  birthdate: "15/04/1990",
-};
+// const userData: User = {
+//   code: "USR12345",
+//   password: "••••••••",
+//   role: "TEACHER",
+//   name: "Tools Lateef",
+//   id: "TL-2023-001",
+//   avatar:
+//     "https://img.tripi.vn/cdn-cgi/image/width=700,height=700/https://gcs.tripi.vn/public-tripi/tripi-feed/img/482740uFk/anh-mo-ta.png",
+//   birthdate: "15/04/1990",
+// };
 
+interface UserById {
+  id: string;
+  createdAt: number;
+  updatedAt: number;
+  code: string;
+  name: string;
+  dateOfBirth: string;
+  role: "STUDENT" | "TEACHER" | "MASTER" | "COMPANY";
+  image?: string;
+  walletId?: string;
+}
 const ProfileScreen = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [image, setImage] = useState<string | null>(null);
+  const [filePath, setFilePath] = useState<string>("");
+  const [checkUpdate, setCheckUpdate] = useState<boolean>(false);
+  const [dataUser, setDataUser] = useState<UserById>();
   const { user, update } = useAuth();
 
   // Get role color
@@ -54,47 +69,83 @@ const ProfileScreen = () => {
   };
 
   const pickImage = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== "granted") {
-      alert("Bạn cần cấp quyền để truy cập thư viện ảnh!");
-      return;
-    }
-
-    // Mở thư viện ảnh
     let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images, // Chỉ chọn ảnh (không chọn video)
-      allowsEditing: true, // Cho phép chỉnh sửa ảnh trước khi chọn
-      aspect: [4, 3], // Tỉ lệ ảnh
-      quality: 1, // Chất lượng ảnh (0.1 - 1)
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
     });
 
-    if (!result.canceled) {
-      setImage(result.assets[0].uri); // Lưu URI ảnh vào state
-      try {
+    if (!result.canceled && result.assets.length > 0) {
+      const selectedImage = result.assets[0].uri;
+      setImage(selectedImage);
+      await uploadImage(selectedImage);
+      await updatedUser();
+    }
+  };
+
+  const uploadImage = async (imageUri: string) => {
+    const formData = new FormData();
+    formData.append("file", {
+      uri: imageUri,
+      name: "profile.jpg",
+      type: "image/jpeg",
+    } as any);
+
+    try {
+      const response = await fetch(
+        "http://192.168.2.6:3000/users/uploadImage",
+        {
+          method: "POST",
+          body: formData,
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      const data = await response.json();
+      setFilePath(data.filePath);
+      console.log("data ok", data);
+    } catch (error) {
+      console.error("Upload failed", error);
+    }
+  };
+
+  const updatedUser = async () => {
+    try {
+      if (filePath.length > 0) {
         const response = await updateUser({
-          id: user?.id || "",
+          id: user?.id,
           body: {
-            image: result.assets[0].uri,
             name: user?.name,
             code: user?.code,
             password: user?.password,
-            dateOfBirth: user?.dateOfBirth,
             role: user?.role,
+            image: filePath,
           },
         });
-        if (response.message) {
-          if (user) {
-            update({
-              ...user,
-              image: result.assets[0].uri,
-            });
-          }
-        }
-      } catch (error) {
-        console.log(error);
+        console.log(response);
+        setCheckUpdate(!checkUpdate);
       }
+    } catch (error) {
+      console.error("Update user  failed", error);
     }
   };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await getUser(user?.id);
+        setDataUser(response);
+      } catch (error) {
+        console.log("fetch user data failed", error);
+      }
+    };
+    if (checkUpdate) {
+      fetchData();
+    }
+  }, [checkUpdate]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -105,7 +156,7 @@ const ProfileScreen = () => {
             {image && (
               <Image
                 source={{
-                  uri: user?.image || "https://via.placeholder.com/150",
+                  uri: image || dataUser?.image,
                 }}
                 style={styles.avatar}
               />
@@ -202,7 +253,7 @@ const ProfileScreen = () => {
                 <Text
                   style={[
                     styles.infoValue,
-                    { color: getRoleColor(userData.role) },
+                    { color: getRoleColor(dataUser?.role) },
                   ]}
                 >
                   {user?.role || "Not specified"}

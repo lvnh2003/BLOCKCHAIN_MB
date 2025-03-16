@@ -1,14 +1,15 @@
 import api from "@/utils/api";
+import * as FileSystem from "expo-file-system";
 
 interface UpdateUserArgs {
-  id: string;
+  id?: string;
   body: {
     name?: string;
-    image?: string;
     code?: string;
     password?: string;
-    dateOfBirth?: string;
     role?: string;
+    dateOfBirth?: string;
+    image?: string | null;
   };
 }
 
@@ -17,26 +18,17 @@ interface UpdateUserResponse {
 }
 
 export const updateUser = async ({
-  id,
   body,
+  id,
 }: UpdateUserArgs): Promise<UpdateUserResponse> => {
   try {
-    const { code, image, name, password, dateOfBirth, role } = body;
-    console.log("body ->", body);
+    const response = await api.put(`users/${id}`, body);
 
-    const response = await api.put(`users/${id}`, {
-      code,
-      image,
-      name,
-      password,
-      dateOfBirth,
-      role,
-    });
-    console.log("response update user:>", response.data);
+    console.log("response data image", response.data);
+
     return response.data;
   } catch (error) {
     console.error("Error update user:", error);
-
     throw new Error("Failed to update user");
   }
 };

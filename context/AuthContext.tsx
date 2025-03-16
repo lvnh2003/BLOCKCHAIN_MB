@@ -7,7 +7,7 @@ interface AuthContextType {
   user: User | null;
   login: (userData: User) => void;
   logout: () => void;
-  update: (user: User) => void;
+  update: (filePath: string) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -22,6 +22,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       const userResponse = await api.get(`/users/code/${userData.code}`);
+      console.log("userResponse", userResponse.data);
       setUser(userResponse.data);
 
       return true;
@@ -44,8 +45,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   };
 
-  const update = (user: User) => {
-    setUser(user);
+  const update = (filePath: string) => {
+    setUser((prevUser) => {
+      if (prevUser) {
+        return { ...prevUser, image: filePath };
+      }
+      return prevUser;
+    });
   };
 
   return (
