@@ -5,132 +5,9 @@ import { SafeAreaView } from "react-native-safe-area-context"
 import { useRouter } from "expo-router"
 import { StatusBar } from "expo-status-bar"
 import { MaterialIcons } from "@expo/vector-icons"
-import {User} from '../../../types'
- const { width } = Dimensions.get("window")
-
-// Mock data for users
-const mockUsers = {
-  students: [
-    {
-      id: "STU001",
-      name: "John Smith",
-      avatar: "https://i.pravatar.cc/150?img=1",
-      birthdate: "1998-05-15",
-      code: "21IT123"
-    },
-    {
-      id: "STU002",
-      name: "Emily Johnson",
-      avatar: "https://i.pravatar.cc/150?img=5",
-      birthdate: "1999-08-22",
-      code: "21IT123"
-    },
-    {
-      id: "STU003",
-      name: "Michael Brown",
-      avatar: "https://i.pravatar.cc/150?img=8",
-      birthdate: "1997-03-10",
-      code: "21IT123"
-    },
-    {
-      id: "STU004",
-      name: "Jessica Davis",
-      avatar: "https://i.pravatar.cc/150?img=9",
-      birthdate: "2000-11-28",
-      code: "21IT123"
-    },
-    {
-      id: "STU005",
-      name: "David Wilson",
-      avatar: "https://i.pravatar.cc/150?img=12",
-      birthdate: "1996-07-04",
-      code: "21IT123"
-    },
-    {
-      id: "STU006",
-      name: "Sarah Martinez",
-      avatar: "https://i.pravatar.cc/150?img=16",
-      birthdate: "1999-01-19",
-      code: "21IT123"
-    },
-    {
-      id: "STU007",
-      name: "James Taylor",
-      avatar: "https://i.pravatar.cc/150?img=20",
-      birthdate: "1998-09-30",
-      code: "21IT123"
-    },
-  ],
-  teachers: [
-    {
-      id: "TCH001",
-      name: "Dr. Robert Anderson",
-      avatar: "https://i.pravatar.cc/150?img=3",
-      birthdate: "1985-04-12",
-      code: "21IT123"
-    },
-    {
-      id: "TCH002",
-      name: "Prof. Jennifer Lee",
-      avatar: "https://i.pravatar.cc/150?img=10",
-      birthdate: "1978-11-05",
-      code: "21IT123"
-    },
-    {
-      id: "TCH003",
-      name: "Dr. William Clark",
-      avatar: "https://i.pravatar.cc/150?img=15",
-      birthdate: "1982-07-22",
-      code: "21IT123"
-    },
-    {
-      id: "TCH004",
-      name: "Prof. Elizabeth Walker",
-      avatar: "https://i.pravatar.cc/150?img=25",
-      birthdate: "1975-03-18",
-      code: "21IT123"
-    },
-    {
-      id: "TCH005",
-      name: "Dr. Thomas Harris",
-      avatar: "https://i.pravatar.cc/150?img=30",
-      birthdate: "1980-09-14",
-      code: "21IT123"
-    },
-  ],
-  companies: [
-    {
-      id: "COM001",
-      name: "Tech Solutions Inc.",
-      avatar: "https://logo.clearbit.com/microsoft.com",
-      code: "21IT123"
-    },
-    {
-      id: "COM002",
-      name: "Global Education Group",
-      avatar: "https://logo.clearbit.com/pearson.com",
-      code: "21IT123"
-    },
-    {
-      id: "COM003",
-      name: "Future Innovations Ltd",
-      avatar: "https://logo.clearbit.com/ibm.com",
-      code: "21IT123"
-    },
-    {
-      id: "COM004",
-      name: "Digital Dynamics",
-      avatar: "https://logo.clearbit.com/adobe.com",
-      code: "21IT123"
-    },
-    {
-      id: "COM005",
-      name: "EduTech Partners",
-      avatar: "https://logo.clearbit.com/udemy.com",
-      code: "21IT123"
-    },
-  ],
-}
+import { User } from '../../../types'
+import { getAllUsers } from "@/utils/admin/getAllUsers"
+const { width } = Dimensions.get("window")
 
 export default function UsersManagement() {
   const router = useRouter()
@@ -139,50 +16,46 @@ export default function UsersManagement() {
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [filteredUsers, setFilteredUsers] = useState<User[]>([])
+  const [usersData, setUsersData] = useState<User[]>([])
 
   useEffect(() => {
-    // Simulate loading data
-    const timer = setTimeout(() => {
+    const fetchData = async () => {
+      const data = await getAllUsers()
+      setUsersData(data)
       setLoading(false)
-      setRefreshing(false)
-      filterUsers()
-    }, 1000)
-    return () => clearTimeout(timer)
-  }, [activeTab, searchQuery])
+      filterUsers(data)
+    }
+    fetchData()
+  }, [])
 
   const onRefresh = () => {
     setRefreshing(true)
-    filterUsers()
+    filterUsers(usersData)
     setTimeout(() => setRefreshing(false), 1000)
   }
 
-  const filterUsers = () => {
-    const users = mockUsers[activeTab as "students" | "teachers" | "companies"]
-    if (!searchQuery) {
-      setFilteredUsers(users)
-      return
-    }
-
-    const filtered = users.filter(
-      (user) =>
-        user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  const filterUsers = (users: User[]) => {
+    const filtered = users.filter(user => {
+      if (activeTab === "students" && user.role !== "STUDENT") return false
+      if (activeTab === "teachers" && user.role !== "TEACHER") return false
+      if (activeTab === "companies" && user.role !== "COMPANY") return false
+      if (!searchQuery) return true
+      return (
+        user.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         user.code.toLowerCase().includes(searchQuery.toLowerCase())
-      );
+      )
+    })
     setFilteredUsers(filtered)
   }
+
+  useEffect(() => {
+    filterUsers(usersData)
+  }, [activeTab, searchQuery, usersData])
 
   const formatDate = (dateString: string) => {
     if (!dateString) return ""
     const date = new Date(dateString)
     return date.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })
-  }
-
-  const getInitials = (name: string) => {
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
   }
 
   const renderUserItem = (user: User, index: number) => {
@@ -193,26 +66,25 @@ export default function UsersManagement() {
             {user.avatar ? (
               <Avatar.Image size={50} source={{ uri: user.avatar }} style={styles.avatar} />
             ) : (
-              <Avatar.Text size={50} label={getInitials(user.name || "")} style={styles.avatar} />
+              <Avatar.Image size={50} source={require("../../../assets/images/avatar.png")} style={styles.avatar} />
             )}
             <View style={styles.userDetails}>
               <Text style={styles.userName}>{user.name}</Text>
               <View style={styles.userMeta}>
-                <Text style={styles.userId}>{user.id}</Text>
+                <Text style={styles.userId}>{user.code}</Text>
                 {(activeTab === "students" || activeTab === "teachers") && (
                   <View style={styles.userMetaItem}>
                     <MaterialIcons name="cake" size={14} color="#666" />
-                    <Text style={styles.userMetaText}>{formatDate(user.birthdate || "")}</Text>
+                    <Text style={styles.userMetaText}>{formatDate(user.birthdate || "") || "None"}</Text>
                   </View>
                 )}
               </View>
             </View>
           </View>
 
-          <View style={styles.userActions}>
+          <View style={styles.userActions}></View>
             <IconButton icon="dots-vertical" size={20} iconColor="#666" onPress={() => {}} style={styles.menuButton} />
           </View>
-        </View>
       </Surface>
     )
   }
@@ -229,9 +101,6 @@ export default function UsersManagement() {
           </TouchableOpacity>
           <Text style={styles.headerTitle}>User Management</Text>
         </View>
-        <TouchableOpacity style={styles.addButton} onPress={() => {}}>
-          <MaterialIcons name="person-add" size={24} color="#fff" />
-        </TouchableOpacity>
       </View>
 
       {/* Search Bar */}
@@ -578,4 +447,3 @@ const styles = StyleSheet.create({
     height: 40,
   },
 })
-
