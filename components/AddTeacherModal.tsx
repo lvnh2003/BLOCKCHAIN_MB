@@ -19,26 +19,27 @@ import {
   IconButton,
 } from "react-native-paper";
 
-interface StudentFormData {
+interface TeacherFormData {
   name: string;
   code: string;
   birthdate: string;
-  avatar?: string;
+  major?: string;
 }
 
-interface StudentModalProps {
+interface TeacherModalProps {
   visible: boolean;
   onClose: () => void;
-  onSubmit: (data: StudentFormData) => void;
+  onSubmit: (data: TeacherFormData) => void;
 }
 
 const { height } = Dimensions.get("window");
 
-const StudentModal: React.FC<StudentModalProps> = ({ visible, onClose, onSubmit }) => {
-  const [formData, setFormData] = useState<StudentFormData>({
+const TeacherModal: React.FC<TeacherModalProps> = ({ visible, onClose, onSubmit }) => {
+  const [formData, setFormData] = useState<TeacherFormData>({
     name: "",
     code: "",
     birthdate: new Date().toISOString().split("T")[0],
+    major: "",
   });
   
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
@@ -52,7 +53,7 @@ const StudentModal: React.FC<StudentModalProps> = ({ visible, onClose, onSubmit 
     }
     
     if (!formData.code) {
-      errors.code = "Student code is required";
+      errors.code = "Teacher code is required";
     }
     
     setFormErrors(errors);
@@ -89,7 +90,7 @@ const StudentModal: React.FC<StudentModalProps> = ({ visible, onClose, onSubmit 
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Add New Student</Text>
+              <Text style={styles.modalTitle}>Add New Teacher</Text>
               <IconButton
                 icon="close"
                 size={24}
@@ -101,7 +102,7 @@ const StudentModal: React.FC<StudentModalProps> = ({ visible, onClose, onSubmit 
             <ScrollView style={styles.formContainer}>
               <TextInput
                 label="Full Name"
-                placeholder="Enter student's full name"
+                placeholder="Enter teacher's full name"
                 value={formData.name}
                 onChangeText={(text) => setFormData({ ...formData, name: text })}
                 style={styles.input}
@@ -112,8 +113,8 @@ const StudentModal: React.FC<StudentModalProps> = ({ visible, onClose, onSubmit 
               {formErrors.name && <HelperText type="error">{formErrors.name}</HelperText>}
 
               <TextInput
-                label="Student Code"
-                placeholder="Enter student's code"
+                label="Teacher Code"
+                placeholder="Enter teacher's code"
                 value={formData.code}
                 onChangeText={(text) => setFormData({ ...formData, code: text })}
                 style={styles.input}
@@ -138,6 +139,16 @@ const StudentModal: React.FC<StudentModalProps> = ({ visible, onClose, onSubmit 
                 />
               </TouchableOpacity>
 
+              <TextInput
+                label="Major"
+                placeholder="Enter teacher's major"
+                value={formData.major}
+                onChangeText={(text) => setFormData({ ...formData, major: text })}
+                style={styles.input}
+                mode="outlined"
+                left={<TextInput.Icon icon="school" />}
+              />
+
               <View style={styles.formActions}>
                 <Button
                   mode="outlined"
@@ -153,7 +164,7 @@ const StudentModal: React.FC<StudentModalProps> = ({ visible, onClose, onSubmit 
                   style={styles.submitButton}
                   labelStyle={styles.submitButtonLabel}
                 >
-                  Add Student
+                  Add Teacher
                 </Button>
               </View>
             </ScrollView>
@@ -226,4 +237,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default StudentModal;
+export default TeacherModal;

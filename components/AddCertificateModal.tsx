@@ -19,26 +19,29 @@ import {
   IconButton,
 } from "react-native-paper";
 
-interface StudentFormData {
+interface CertificateFormData {
   name: string;
-  code: string;
-  birthdate: string;
-  avatar?: string;
+  issuedTo: string;
+  createdAt: number;
+  description?: string;
+  status: "PENDING" | "SIGNED" | "APPROVED";
 }
 
-interface StudentModalProps {
+interface CertificateModalProps {
   visible: boolean;
   onClose: () => void;
-  onSubmit: (data: StudentFormData) => void;
+  onSubmit: (data: CertificateFormData) => void;
 }
 
 const { height } = Dimensions.get("window");
 
-const StudentModal: React.FC<StudentModalProps> = ({ visible, onClose, onSubmit }) => {
-  const [formData, setFormData] = useState<StudentFormData>({
+const CertificateModal: React.FC<CertificateModalProps> = ({ visible, onClose, onSubmit }) => {
+  const [formData, setFormData] = useState<CertificateFormData>({
     name: "",
-    code: "",
-    birthdate: new Date().toISOString().split("T")[0],
+    issuedTo: "",
+    createdAt: Date.now(),
+    description: "",
+    status: "PENDING",
   });
   
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
@@ -48,11 +51,11 @@ const StudentModal: React.FC<StudentModalProps> = ({ visible, onClose, onSubmit 
     const errors: Record<string, string> = {};
     
     if (!formData.name) {
-      errors.name = "Name is required";
+      errors.name = "Certificate name is required";
     }
     
-    if (!formData.code) {
-      errors.code = "Student code is required";
+    if (!formData.issuedTo) {
+      errors.issuedTo = "Recipient is required";
     }
     
     setFormErrors(errors);
@@ -73,8 +76,7 @@ const StudentModal: React.FC<StudentModalProps> = ({ visible, onClose, onSubmit 
   const onDateChange = (_: any, selectedDate?: Date) => {
     setShowDatePicker(false);
     if (selectedDate) {
-      const isoDate = selectedDate.toISOString().split("T")[0];
-      setFormData({ ...formData, birthdate: isoDate });
+      setFormData({ ...formData, createdAt: selectedDate.getTime() });
     }
   };
 
@@ -89,7 +91,7 @@ const StudentModal: React.FC<StudentModalProps> = ({ visible, onClose, onSubmit 
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Add New Student</Text>
+              <Text style={styles.modalTitle}>Issue New Certificate</Text>
               <IconButton
                 icon="close"
                 size={24}
@@ -100,36 +102,36 @@ const StudentModal: React.FC<StudentModalProps> = ({ visible, onClose, onSubmit 
 
             <ScrollView style={styles.formContainer}>
               <TextInput
-                label="Full Name"
-                placeholder="Enter student's full name"
+                label="Certificate Name"
+                placeholder="Enter certificate name"
                 value={formData.name}
                 onChangeText={(text) => setFormData({ ...formData, name: text })}
                 style={styles.input}
                 mode="outlined"
                 error={!!formErrors.name}
-                left={<TextInput.Icon icon="account" />}
+                left={<TextInput.Icon icon="certificate" />}
               />
               {formErrors.name && <HelperText type="error">{formErrors.name}</HelperText>}
 
               <TextInput
-                label="Student Code"
-                placeholder="Enter student's code"
-                value={formData.code}
-                onChangeText={(text) => setFormData({ ...formData, code: text })}
+                label="Issued To (Student Code)"
+                placeholder="Enter student code"
+                value={formData.issuedTo}
+                onChangeText={(text) => setFormData({ ...formData, issuedTo: text })}
                 style={styles.input}
                 mode="outlined"
-                error={!!formErrors.code}
-                left={<TextInput.Icon icon="card-account-details" />}
+                error={!!formErrors.issuedTo}
+                left={<TextInput.Icon icon="account" />}
               />
-              {formErrors.code && <HelperText type="error">{formErrors.code}</HelperText>}
+              {formErrors.issuedTo && <HelperText type="error">{formErrors.issuedTo}</HelperText>}
 
               <TouchableOpacity
                 style={styles.datePickerButton}
                 onPress={() => setShowDatePicker(true)}
               >
                 <TextInput
-                  label="Date of Birth"
-                  value={formData.birthdate ? formatDate(new Date(formData.birthdate)) : ""}
+                  label="Issue Date"
+                  value={formatDate(new Date(formData.createdAt))}
                   style={styles.input}
                   mode="outlined"
                   editable={false}
@@ -137,6 +139,60 @@ const StudentModal: React.FC<StudentModalProps> = ({ visible, onClose, onSubmit 
                   right={<TextInput.Icon icon="chevron-down" />}
                 />
               </TouchableOpacity>
+
+              <TextInput
+                label="Description"
+                placeholder="Enter certificate description"
+                value={formData.description}
+                onChangeText={(text) => setFormData({ ...formData, description: text })}
+                style={[styles.input, styles.textArea]}
+                mode="outlined"
+                multiline
+                numberOfLines={4}
+                left={<TextInput.Icon icon="text" />}
+              />
+
+              <View style={styles.statusContainer}>
+                <Text style={styles.statusLabel}>Status:</Text>
+                <View style={styles.statusOptions}>
+                  <TouchableOpacity 
+                    style={[
+                      styles.statusOption, 
+                      formData.status === "PENDING" && styles.statusOptionSelected
+                    ]}
+                    onPress={() => setFormData({ ...formData, status: "PENDING" })}
+                  >
+                    <Text style={[
+                      styles.statusOptionText,
+                      formData.status === "PENDING" && styles.statusOptionTextSelected
+                    ]}>Pending</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    style={[
+                      styles.statusOption, 
+                      formData.status === "SIGNED" && styles.statusOptionSelected
+                    ]}
+                    onPress={() => setFormData({ ...formData, status: "SIGNED" })}
+                  >
+                    <Text style={[
+                      styles.statusOptionText,
+                      formData.status === "SIGNED" && styles.statusOptionTextSelected
+                    ]}>Signed</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    style={[
+                      styles.statusOption, 
+                      formData.status === "APPROVED" && styles.statusOptionSelected
+                    ]}
+                    onPress={() => setFormData({ ...formData, status: "APPROVED" })}
+                  >
+                    <Text style={[
+                      styles.statusOptionText,
+                      formData.status === "APPROVED" && styles.statusOptionTextSelected
+                    ]}>Approved</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
 
               <View style={styles.formActions}>
                 <Button
@@ -153,10 +209,11 @@ const StudentModal: React.FC<StudentModalProps> = ({ visible, onClose, onSubmit 
                   style={styles.submitButton}
                   labelStyle={styles.submitButtonLabel}
                 >
-                  Add Student
+                  Issue Certificate
                 </Button>
               </View>
             </ScrollView>
+
           </View>
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
@@ -203,6 +260,44 @@ const styles = StyleSheet.create({
   datePickerButton: {
     marginBottom: 16,
   },
+  textArea: {
+    minHeight: 100,
+    textAlignVertical: 'top',
+  },
+  statusContainer: {
+    marginBottom: 16,
+  },
+  statusLabel: {
+    fontSize: 16,
+    fontWeight: "500",
+    color: "#333",
+    marginBottom: 8,
+  },
+  statusOptions: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  statusOption: {
+    flex: 1,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 8,
+    marginHorizontal: 4,
+    alignItems: "center",
+  },
+  statusOptionSelected: {
+    backgroundColor: "#374785",
+    borderColor: "#374785",
+  },
+  statusOptionText: {
+    color: "#666",
+    fontWeight: "500",
+  },
+  statusOptionTextSelected: {
+    color: "#fff",
+  },
   formActions: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -226,4 +321,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default StudentModal;
+export default CertificateModal;

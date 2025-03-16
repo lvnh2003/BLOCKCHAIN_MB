@@ -3,7 +3,6 @@ import {
   View,
   StyleSheet,
   ScrollView,
-  TouchableOpacity,
   Platform,
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
@@ -19,62 +18,51 @@ import {
   IconButton,
 } from "react-native-paper";
 
-interface StudentFormData {
+interface CompanyFormData {
   name: string;
-  code: string;
-  birthdate: string;
-  avatar?: string;
+  email: string;
+  industry?: string;
 }
 
-interface StudentModalProps {
+interface CompanyModalProps {
   visible: boolean;
   onClose: () => void;
-  onSubmit: (data: StudentFormData) => void;
+  onSubmit: (data: CompanyFormData) => void;
 }
 
 const { height } = Dimensions.get("window");
 
-const StudentModal: React.FC<StudentModalProps> = ({ visible, onClose, onSubmit }) => {
-  const [formData, setFormData] = useState<StudentFormData>({
+const CompanyModal: React.FC<CompanyModalProps> = ({ visible, onClose, onSubmit }) => {
+  const [formData, setFormData] = useState<CompanyFormData>({
     name: "",
-    code: "",
-    birthdate: new Date().toISOString().split("T")[0],
+    email: "",
+    industry: "",
   });
   
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-  const [showDatePicker, setShowDatePicker] = useState(false);
+
+  const validateEmail = (email: string): boolean => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(String(email).toLowerCase());
+  };
 
   const handleSubmit = () => {
     const errors: Record<string, string> = {};
     
     if (!formData.name) {
-      errors.name = "Name is required";
+      errors.name = "Company name is required";
     }
     
-    if (!formData.code) {
-      errors.code = "Student code is required";
+    if (!formData.email) {
+      errors.email = "Email is required";
+    } else if (!validateEmail(formData.email)) {
+      errors.email = "Invalid email format";
     }
     
     setFormErrors(errors);
     
     if (Object.keys(errors).length === 0) {
       onSubmit(formData);
-    }
-  };
-
-  const formatDate = (date: Date): string => {
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  };
-
-  const onDateChange = (_: any, selectedDate?: Date) => {
-    setShowDatePicker(false);
-    if (selectedDate) {
-      const isoDate = selectedDate.toISOString().split("T")[0];
-      setFormData({ ...formData, birthdate: isoDate });
     }
   };
 
@@ -89,7 +77,7 @@ const StudentModal: React.FC<StudentModalProps> = ({ visible, onClose, onSubmit 
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Add New Student</Text>
+              <Text style={styles.modalTitle}>Add New Company</Text>
               <IconButton
                 icon="close"
                 size={24}
@@ -100,43 +88,39 @@ const StudentModal: React.FC<StudentModalProps> = ({ visible, onClose, onSubmit 
 
             <ScrollView style={styles.formContainer}>
               <TextInput
-                label="Full Name"
-                placeholder="Enter student's full name"
+                label="Company Name"
+                placeholder="Enter company name"
                 value={formData.name}
                 onChangeText={(text) => setFormData({ ...formData, name: text })}
                 style={styles.input}
                 mode="outlined"
                 error={!!formErrors.name}
-                left={<TextInput.Icon icon="account" />}
+                left={<TextInput.Icon icon="domain" />}
               />
               {formErrors.name && <HelperText type="error">{formErrors.name}</HelperText>}
 
               <TextInput
-                label="Student Code"
-                placeholder="Enter student's code"
-                value={formData.code}
-                onChangeText={(text) => setFormData({ ...formData, code: text })}
+                label="Email"
+                placeholder="Enter company email"
+                value={formData.email}
+                onChangeText={(text) => setFormData({ ...formData, email: text })}
                 style={styles.input}
                 mode="outlined"
-                error={!!formErrors.code}
-                left={<TextInput.Icon icon="card-account-details" />}
+                keyboardType="email-address"
+                error={!!formErrors.email}
+                left={<TextInput.Icon icon="email" />}
               />
-              {formErrors.code && <HelperText type="error">{formErrors.code}</HelperText>}
+              {formErrors.email && <HelperText type="error">{formErrors.email}</HelperText>}
 
-              <TouchableOpacity
-                style={styles.datePickerButton}
-                onPress={() => setShowDatePicker(true)}
-              >
-                <TextInput
-                  label="Date of Birth"
-                  value={formData.birthdate ? formatDate(new Date(formData.birthdate)) : ""}
-                  style={styles.input}
-                  mode="outlined"
-                  editable={false}
-                  left={<TextInput.Icon icon="calendar" />}
-                  right={<TextInput.Icon icon="chevron-down" />}
-                />
-              </TouchableOpacity>
+              <TextInput
+                label="Industry"
+                placeholder="Enter company industry"
+                value={formData.industry}
+                onChangeText={(text) => setFormData({ ...formData, industry: text })}
+                style={styles.input}
+                mode="outlined"
+                left={<TextInput.Icon icon="office-building" />}
+              />
 
               <View style={styles.formActions}>
                 <Button
@@ -153,7 +137,7 @@ const StudentModal: React.FC<StudentModalProps> = ({ visible, onClose, onSubmit 
                   style={styles.submitButton}
                   labelStyle={styles.submitButtonLabel}
                 >
-                  Add Student
+                  Add Company
                 </Button>
               </View>
             </ScrollView>
@@ -200,9 +184,6 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     backgroundColor: "#fff",
   },
-  datePickerButton: {
-    marginBottom: 16,
-  },
   formActions: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -226,4 +207,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default StudentModal;
+export default CompanyModal;
