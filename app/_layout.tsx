@@ -18,6 +18,8 @@ function AuthRedirect() {
         router.replace("/(tabs)");
       } else if (user.role === "COMPANY") {
         router.replace("/(company)");
+      } else if (user.role === "COMPANY") {
+        router.replace("/(company)");
       }
     } else {
       router.replace("/(auth)/login");

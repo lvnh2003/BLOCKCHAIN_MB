@@ -1,12 +1,13 @@
-import React, { createContext, useState, useContext, ReactNode } from 'react';
-import { User } from '../types';
-import axios from 'axios';
-import api from '@/utils/api';
-import Toast from 'react-native-toast-message';
+import React, { createContext, useState, useContext, ReactNode } from "react";
+import { User } from "../types";
+import axios from "axios";
+import api from "@/utils/api";
+import Toast from "react-native-toast-message";
 interface AuthContextType {
   user: User | null;
   login: (userData: User) => void;
   logout: () => void;
+  update: (filePath: string) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -19,11 +20,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         code: userData.code,
         password: userData.password,
       });
-  
+
       const userResponse = await api.get(`/users/code/${userData.code}`);
+      console.log("userResponse", userResponse.data);
       setUser(userResponse.data);
-      
-      return true; 
+
+      return true;
     } catch (error) {
       if (axios.isAxiosError(error)) {
         Toast.show({
@@ -34,8 +36,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           visibilityTime: 4000,
         });
       }
-  
-      return false; 
+
+      return false;
     }
   };
 
@@ -43,8 +45,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   };
 
+  const update = (filePath: string) => {
+    setUser((prevUser) => {
+      if (prevUser) {
+        return { ...prevUser, image: filePath };
+      }
+      return prevUser;
+    });
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, login, logout, update }}>
       {children}
     </AuthContext.Provider>
   );
@@ -53,7 +64,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };

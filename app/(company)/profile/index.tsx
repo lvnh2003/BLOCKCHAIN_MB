@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
   View,
@@ -7,33 +7,46 @@ import {
   TouchableOpacity,
   SafeAreaView,
   ScrollView,
-  Switch
+  Switch,
+  Button,
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
+import * as ImagePicker from "expo-image-picker";
 import { User } from "@/types";
+import { useAuth } from "@/context/AuthContext";
+import { updateUser } from "@/apis/company/update-user";
+import { getUser } from "@/apis/company/get-user";
 
-// Sample user data
-const userData: User = {
-  code: "USR12345",
-  password: "••••••••",
-  role: "TEACHER",
-  name: "Tools Lateef",
-  id: "TL-2023-001",
-  avatar: "https://img.tripi.vn/cdn-cgi/image/width=700,height=700/https://gcs.tripi.vn/public-tripi/tripi-feed/img/482740uFk/anh-mo-ta.png",
-  birthdate: "15/04/1990"
-};
-
+interface UserById {
+  id: string;
+  createdAt: number;
+  updatedAt: number;
+  code: string;
+  name: string;
+  dateOfBirth: string;
+  role: "STUDENT" | "TEACHER" | "MASTER" | "COMPANY";
+  image?: string;
+  walletId?: string;
+}
 const ProfileScreen = () => {
   const [showPassword, setShowPassword] = useState(false);
-  
+  const [image, setImage] = useState<string | null>(null);
+  const [filePath, setFilePath] = useState<string>("");
+  const [checkUpdate, setCheckUpdate] = useState<boolean>(false);
+  const [dataUser, setDataUser] = useState<UserById>();
+  const { user, update } = useAuth();
+
   // Get role color
   const getRoleColor = (role?: string) => {
-    switch(role) {
-      case "STUDENT": return "#4CAF50";
-      case "TEACHER": return "#2196F3";
-      case "MASTER": return "#FF9800";
-      default: return "#757575";
+    switch (role) {
+      case "STUDENT":
+        return "#4CAF50";
+      case "TEACHER":
+        return "#2196F3";
+      case "MASTER":
+        return "#FF9800";
+      default:
+        return "#757575";
     }
   };
 
@@ -43,22 +56,126 @@ const ProfileScreen = () => {
     return dateString;
   };
 
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+
+    if (!result.canceled && result.assets.length > 0) {
+      const selectedImage = result.assets[0].uri;
+      setImage(selectedImage);
+      try {
+        const filePathImage = await uploadImage(selectedImage);
+        await updatedUser(filePathImage);
+      } catch (error) {
+        console.error("Failed to upload image or update user", error);
+      }
+    }
+  };
+
+  const uploadImage = async (imageUri: string) => {
+    console.log(1);
+    const formData = new FormData();
+    formData.append("file", {
+      uri: imageUri,
+      name: "profile.jpg",
+      type: "image/jpeg",
+    } as any);
+
+    try {
+      const response = await fetch(
+        "http://192.168.2.6:3000/users/uploadImage",
+        {
+          method: "POST",
+          body: formData,
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      const data = await response.json();
+      console.log("data ok", data);
+      setFilePath(data.filePath);
+      return data.filePath;
+    } catch (error) {
+      console.error("Upload failed", error);
+    }
+  };
+
+  const updatedUser = async (filePathImage: string) => {
+    try {
+      if (filePath.length > 0) {
+        const response = await updateUser({
+          id: user?.id,
+          body: {
+            name: user?.name,
+            code: user?.code,
+            password: user?.password,
+            role: user?.role,
+            image: filePathImage,
+            dateOfBirth: user?.dateOfBirth,
+          },
+        });
+        console.log("update user succes", response);
+        setCheckUpdate(!checkUpdate);
+      }
+    } catch (error) {
+      console.error("Update user  failed", error);
+    }
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await getUser(user?.id);
+        console.log("user data first", response);
+        setDataUser(response);
+      } catch (error) {
+        console.log("fetch user data failed", error);
+      }
+    };
+    fetchData();
+  }, [checkUpdate, filePath]);
+
+  useEffect(() => {
+    console.log("dataUser", dataUser?.image);
+  }, [dataUser]);
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         {/* Header Section */}
         <View style={styles.header}>
           <View style={styles.avatarContainer}>
-            <Image
-              source={{
-                uri: userData.avatar || "https://via.placeholder.com/150"
-              }}
-              style={styles.avatar}
-            />
+            {image || dataUser?.image ? (
+              <Image
+                source={{
+                  uri: image || dataUser?.image,
+                }}
+                style={styles.avatar}
+              />
+            ) : (
+              <Image
+                source={{
+                  uri: "https://static.vecteezy.com/system/resources/previews/009/292/244/non_2x/default-avatar-icon-of-social-media-user-vector.jpg",
+                }}
+                style={styles.avatar}
+              />
+            )}
             <View style={styles.nameContainer}>
-              <Text style={styles.name}>{userData.name || "User Name"}</Text>
-              <View style={[styles.roleBadge, { backgroundColor: getRoleColor(userData.role) }]}>
-                <Text style={styles.roleText}>{userData.role || "ROLE"}</Text>
+              <Text style={styles.name}>{user?.name || "User Name"}</Text>
+              <View
+                style={[
+                  styles.roleBadge,
+                  { backgroundColor: getRoleColor(user?.role) },
+                ]}
+              >
+                <Text style={styles.roleText}>{user?.role || "ROLE"}</Text>
+                <Button title="Chọn ảnh từ thư viện" onPress={pickImage} />
               </View>
             </View>
           </View>
@@ -67,57 +184,84 @@ const ProfileScreen = () => {
         {/* User Information Section */}
         <View style={styles.infoSection}>
           <Text style={styles.sectionTitle}>User Information</Text>
-          
+
           <View style={styles.infoCard}>
             <View style={styles.infoItem}>
-              <MaterialCommunityIcons name="identifier" size={24} color="#EF4637" />
+              <MaterialCommunityIcons
+                name="identifier"
+                size={24}
+                color="#EF4637"
+              />
               <View style={styles.infoContent}>
                 <Text style={styles.infoLabel}>User ID</Text>
-                <Text style={styles.infoValue}>{userData.id || "Not specified"}</Text>
+                <Text style={styles.infoValue}>
+                  {user?.id || "Not specified"}
+                </Text>
               </View>
             </View>
-            
+
             <View style={styles.infoItem}>
-              <MaterialCommunityIcons name="barcode" size={24} color="#EF4637" />
+              <MaterialCommunityIcons
+                name="barcode"
+                size={24}
+                color="#EF4637"
+              />
               <View style={styles.infoContent}>
                 <Text style={styles.infoLabel}>Code</Text>
-                <Text style={styles.infoValue}>{userData.code}</Text>
+                <Text style={styles.infoValue}>{user?.code}</Text>
               </View>
             </View>
-            
+
             <View style={styles.infoItem}>
               <MaterialCommunityIcons name="lock" size={24} color="#EF4637" />
               <View style={styles.infoContent}>
                 <Text style={styles.infoLabel}>Password</Text>
                 <View style={styles.passwordContainer}>
                   <Text style={styles.infoValue}>
-                    {showPassword ? userData.password : "••••••••"}
+                    {showPassword ? user?.password : "••••••••"}
                   </Text>
-                  <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-                    <MaterialCommunityIcons 
-                      name={showPassword ? "eye-off" : "eye"} 
-                      size={20} 
-                      color="#757575" 
+                  <TouchableOpacity
+                    onPress={() => setShowPassword(!showPassword)}
+                  >
+                    <MaterialCommunityIcons
+                      name={showPassword ? "eye-off" : "eye"}
+                      size={20}
+                      color="#757575"
                     />
                   </TouchableOpacity>
                 </View>
               </View>
             </View>
-            
+
             <View style={styles.infoItem}>
-              <MaterialCommunityIcons name="cake-variant" size={24} color="#EF4637" />
+              <MaterialCommunityIcons
+                name="cake-variant"
+                size={24}
+                color="#EF4637"
+              />
               <View style={styles.infoContent}>
                 <Text style={styles.infoLabel}>Birthdate</Text>
-                <Text style={styles.infoValue}>{formatDate(userData.birthdate)}</Text>
+                <Text style={styles.infoValue}>
+                  {formatDate(user?.dateOfBirth)}
+                </Text>
               </View>
             </View>
-            
+
             <View style={styles.infoItem}>
-              <MaterialCommunityIcons name="account-tie" size={24} color="#EF4637" />
+              <MaterialCommunityIcons
+                name="account-tie"
+                size={24}
+                color="#EF4637"
+              />
               <View style={styles.infoContent}>
                 <Text style={styles.infoLabel}>Role</Text>
-                <Text style={[styles.infoValue, { color: getRoleColor(userData.role) }]}>
-                  {userData.role || "Not specified"}
+                <Text
+                  style={[
+                    styles.infoValue,
+                    { color: getRoleColor(dataUser?.role) },
+                  ]}
+                >
+                  {user?.role || "Not specified"}
                 </Text>
               </View>
             </View>
